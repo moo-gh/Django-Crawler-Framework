@@ -224,7 +224,7 @@ class CrawlerEngine:
             exec(self.page.structure.news_links_code)  # pylint: disable=exec-used
         else:
             for element in elements:
-                data.append(element["href"])
+                data.append({"link": element["href"]})
         return data
 
     def fetch_links(self):
