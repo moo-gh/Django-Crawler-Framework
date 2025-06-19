@@ -101,6 +101,7 @@ class AgencyAdmin(ReadOnlyAdminDateFieldsMIXIN):
         "load_timeout",
         "pages_count",
         "created_at",
+        "updated_at",
     )
 
 

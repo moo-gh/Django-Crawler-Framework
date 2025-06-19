@@ -212,6 +212,12 @@ class CrawlerEngine:
         scroll(self.driver, self.page.scroll)
 
     def post_crawling(self, data):
+        """
+        Post crawling is the function that is called after the links are fetched.
+        It is used to store the fetched links in the database and to update the report.
+        It is also used to save the fetched links to the redis database.
+        It is also used to save the fetched links to the duplicate checker.
+        """
         self.logging(f"Fetched links are: {data}")
         self.fetched_links = data
         self.fetched_links_count = len(data)
