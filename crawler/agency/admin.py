@@ -52,9 +52,6 @@ class ReportAdmin(ReadOnlyAdminDateFieldsMIXIN):
         "picture",
         "new_links",
         "fetched_links",
-        "created_at",
-        "updated_at",
-        "deleted_at",
     )
     list_filter = ["status", "page__agency", ("created_at", DateTimeRangeFilter)]
 
