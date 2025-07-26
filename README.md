@@ -1,61 +1,228 @@
-## Websites Crawler Framework
+# Websites Crawler Framework
 
-### Story of This Project
-There are sometimes that we want to be first person that get notice about new posts in a website. For example when you're looking for a house, you want to be first person that apply to its advertisement and by this way you want to increase your chance in getting it. Besides, sometime you may want to get new articles from your favorite websites on a daily. This framework is designed specifically for these goals.
+A powerful Django-based web crawling framework designed to monitor websites for new content and automatically notify users of updates. Perfect for real estate monitoring, news aggregation, job hunting, and any scenario where being first to discover new content provides an advantage.
 
----
-### How To Setup?
-You can setup the project using docker-compose command.
+## 🎯 Use Cases
+
+- **Real Estate Monitoring**: Be the first to apply to new property listings
+- **News Aggregation**: Get notified of new articles from your favorite websites
+- **Job Hunting**: Monitor job boards for new opportunities
+- **E-commerce**: Track new products or price drops
+- **Content Monitoring**: Stay updated on blogs, forums, and social media
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Docker and Docker Compose
+- Git
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone git@github.com:ghorbani-mohammad/crawler-framework.git
+   cd crawler-framework
+   ```
+
+2. **Start the application**
+   ```bash
+   # Development
+   docker-compose up
+   
+   # Production
+   docker-compose -f docker-compose-prod.yml up
+   ```
+
+3. **Access the application**
+   - Django Admin: `http://localhost:8000/secret-admin/`
+   - API Endpoints: `http://localhost:8000/api/`
+
+## 🏗️ Architecture Overview
+
+This framework is built around three core entities that work together to create a comprehensive crawling solution:
+
+### 1. Agency
+**Definition**: Represents a website or domain you want to monitor
+**Examples**: CNN, BBC, Digikala, LinkedIn Jobs
+
+**Key Features**:
+- Configure website-specific settings
+- Set crawling intervals and timeouts
+- Define proxy settings
+- Configure notification preferences
+
+### 2. Page
+**Definition**: Specific pages within an agency that contain the content you want to monitor
+**Examples**: CNN Politics page, BBC Technology section, Job listings page
+
+**Key Features**:
+- Define page-specific crawling rules
+- Set up filtering and token management
+- Configure scroll behavior for dynamic content
+- Set message templates for notifications
+
+### 3. Structure
+**Definition**: Defines how to extract data from pages using CSS selectors and XPath
+**Purpose**: Tells the crawler engine exactly what elements to look for and how to extract information
+
+**Key Components**:
+- **News Links Structure**: CSS selectors to find article/product links
+- **Content Structure**: How to extract titles, descriptions, dates, etc.
+- **Pagination Structure**: How to navigate through multiple pages
+
+## 📊 Example: Crawling Job Listings
+
+Here's how you would set up monitoring for a job board:
+
+1. **Create Agency**: "Tech Jobs Board"
+2. **Create Page**: "Software Engineer Listings"
+3. **Define Structure**: 
+   - News Links: `a.job-listing-link`
+   - Title: `h2.job-title`
+   - Company: `span.company-name`
+   - Location: `span.job-location`
+
+## 🔧 Configuration
+
+### Environment Variables
 ```bash
-  git clone git@github.com:ghorbani-mohammad/crawler-framework.git
-  cd crawler-framework
-  docker-compose up
+# Database
+DATABASE_URL=postgresql://user:pass@localhost/db
+
+# Email (for notifications)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=your-email@gmail.com
+EMAIL_HOST_PASSWORD=your-app-password
+
+# Selenium Grid
+SELENIUM_HUB_URL=http://selenium-hub:4444/wd/hub
+
+# Redis (for Celery)
+REDIS_URL=redis://redis:6379/0
 ```
-- For production you can use ```docker-compose -f docker-compose-prod.yml up```. 
-- I've used gunicorn to served the requests.
-- For serving static files, I've used Nginx. Checkout crawler_api_nginx.conf configuration.
-- I've used selenium hub(grid) to provide multiple browser sessions at same time.
-- You can configure smtp server credentials and set your email to get error logs in your email inbox
-- You can also check all logs (all levels) in Django admin (DBLogEntry model)
-- You can use provided shell commands to easily manage the project (checkout mng-api.sh file)
+
+### Key Features
+
+#### 🔍 Multi-Browser Support
+- Uses Selenium Grid for parallel browser sessions
+- Supports Chrome, Firefox, Safari
+- Handles JavaScript-heavy websites
+
+#### 📧 Notification System
+- Email notifications for new content
+- Telegram bot integration
+- Customizable message templates
+
+#### 🛡️ Proxy Support
+- Rotate proxies to avoid rate limiting
+- Configure per-agency proxy settings
+- Automatic proxy health checking
+
+#### 📈 Monitoring & Logging
+- Comprehensive logging in Django admin
+- Performance metrics and crawl statistics
+- Error tracking and alerting
+
+#### ⏰ Scheduling
+- Flexible scheduling with cron-like syntax
+- Off-time configuration to avoid peak hours
+- Per-page scheduling options
+
+## 👥 Guest Access
+
+Want to see the framework in action? Use our guest account to explore the admin panel and see real-world examples:
+
+- **URL**: [https://crawler.m-gh.com/secret-admin/](https://crawler.m-gh.com/secret-admin/)
+- **Username**: `guest`
+- **Password**: `RPxzsoen4O`
+
+The guest account provides read-only access to see how various websites are configured and how the framework handles different types of content.
+
+## 📱 Telegram Channels
+
+See the framework in action through these Telegram channels that are powered by this crawler:
+
+- [The New Yorker Agency News](https://t.me/newyorkercom)
+- [Product Hunt Daily](https://t.me/producthuntdaily)
+- [Python Jobs](https://t.me/iran_careers)
+- [More channels...]
+
+## 🛠️ Management Commands
+
+Use the provided shell script for easy management:
+
+```bash
+# Start the application
+./mng-api.sh start
+
+# Stop the application
+./mng-api.sh stop
+
+# View logs
+./mng-api.sh logs
+
+# Restart services
+./mng-api.sh restart
+```
+
+## 📁 Project Structure
+
+```
+crawler/
+├── agency/                 # Main crawling app
+│   ├── models.py          # Agency, Page, Structure models
+│   ├── views.py           # API endpoints
+│   ├── tasks.py           # Celery tasks
+│   └── crawler_engine.py  # Core crawling logic
+├── notification/           # Notification system
+├── reusable/              # Shared utilities
+├── crawler/               # Django settings
+└── manage.py              # Django management
+```
+
+## 🔄 Development
+
+### Running Tests
+```bash
+docker-compose exec web python manage.py test
+```
+
+### Code Formatting
+```bash
+# Format Python code
+make format-python
+
+# Lint Python code
+make lint-python
+```
+
+### Database Migrations
+```bash
+docker-compose exec web python manage.py makemigrations
+docker-compose exec web python manage.py migrate
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🆘 Support
+
+If you encounter any issues or have questions:
+
+1. Check the [Issues](https://github.com/ghorbani-mohammad/crawler-framework/issues) page
+2. Review the logs in Django admin
+3. Check the documentation in the code comments
 
 ---
-### The Ingredients of This Project
-This is a framework for crawling data from websites. You define a website, then the pages of that website and in the last step you define the structure of those pages so the crawler engine can retrieve data from them. In this framework we have three main entities:
-  - Agency
-  - Page
-  - Structure
-#### Agency
-Agencies are the websites, like CNN and BBC. First step is defining agencies.
 
-#### Page
-Pages, are different pages of an agency or a website. For instance, the CNN website has political, entertainment and etc pages in it. After defining your agencies you can specify pages of that website which you want crawl data from them.
-
-#### Structure
-Structures define how crawler engine should gather data from a page. When you defining a page, you should specify its structure.
-So you need define structure of a page, before creating the page. This model has three important fields that probably you need fill those.
-
-First one is news_links_structure. This field specifies how we should get links of news or articles or anything that we want. At the below picture you can see an example. As you can see, we gather elements with tag **a** that has class attribute with value **c-jobListView__titleLink**
-![image](https://user-images.githubusercontent.com/12118217/186157990-260c1c86-0ebf-4859-8d32-018d1551f028.png)
-
----
-### Guest User
-Guest user have read-only access to some models, So using that, you can login into Django admin and 
-see what potentials can have this project. By log in into the Django admin, you can see I have defined a bunch
-of websites that I get their new posts periodically. These are some examples that help you to create your
-own crawler.
-
-- Guest User Credential:
-  * **Username**: `guest`
-  * **Password**: `RPxzsoen4O`
-- Django Admin Panel:
-  * [https://crawler.m-gh.com/secret-admin/](https://crawler.m-gh.com/secret-admin/)
-
-
-### Telegram Channels
-There are some TG channels that I use this crawler framework to keep them updated.
-Example:
-  * [The New Yorker Agency News](https://t.me/newyorkercom)
-  * [Product Haunt](https://t.me/producthuntdaily)
-  * [Python Jobs](https://t.me/iran_careers)
-  * [....]
+**Built with ❤️ using Django, Celery, Selenium, and Docker**
