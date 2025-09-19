@@ -120,8 +120,16 @@ def check_agencies():
                 check_must_crawl(page)
 
 
-def register_log(description: str, error: str, page: models.Page, url: str):
-    logger.error("desc: %s\ntrace: %s", description, traceback.format_exc())
+def register_log(description: str, error: str, page: models.Page, url: str, log_level: str = "error"):
+    if log_level == "error":
+        logger.error("desc: %s\ntrace: %s", description, traceback.format_exc())
+    elif log_level == "info":
+        logger.info("desc: %s\ntrace: %s", description, traceback.format_exc())
+    elif log_level == "debug":
+        logger.debug("desc: %s\ntrace: %s", description, traceback.format_exc())
+    else:
+        logger.warning("desc: %s\ntrace: %s", description, traceback.format_exc())
+
     models.Log.objects.create(
         page=page,
         description=description,
@@ -199,7 +207,7 @@ def checking_ignore_tags(
     for token in ig_tokens:
         if token in message:
             message = f"message contains {token}"
-            register_log(message, "ignored content", page, "")
+            register_log(message, "ignored content", page, "", "debug")
             return True
     return False
 
