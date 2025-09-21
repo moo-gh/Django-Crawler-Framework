@@ -269,6 +269,10 @@ def redis_exporter():
                 message = local_vars.get("message", "")
                 if checking_ignore_tags(page, message, ignoring_tokens[page.id]):
                     continue
+                # Check if message is empty or contains only whitespace
+                if not message or not message.strip():
+                    register_log("Empty message generated, skipping telegram send", "empty message", page, data["link"], "warning")
+                    continue
                 bot.send_message(chat_id=page.telegram_channel, text=message)
                 time.sleep(1.5)
             except KeyError as error:
