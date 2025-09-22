@@ -1,3 +1,12 @@
+# [1.57.0](https://github.com/ghorbani-mohammad/Django-Crawler-Framework/compare/v1.56.1...v1.57.0) (2025-09-22)
+
+
+### Features
+
+* implement Telegram message sending with retry logic and rate limiting ([094f00b](https://github.com/ghorbani-mohammad/Django-Crawler-Framework/commit/094f00ba1e0b1e01c1c63731e24316de281c1414))
+
+
+
 ## [1.56.1](https://github.com/ghorbani-mohammad/Django-Crawler-Framework/compare/v1.56.0...v1.56.1) (2025-09-21)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * enhance PageAdminForm to include URL field with clickable link ([e8940e3](https://github.com/ghorbani-mohammad/Django-Crawler-Framework/commit/e8940e3adcf9e1a6e1d568721e6ee5c245ef3c29))
-
-
-
-# [1.54.0](https://github.com/ghorbani-mohammad/Django-Crawler-Framework/compare/v1.53.0...v1.54.0) (2025-04-07)
-
-
-### Features
-
-* add monitor_page_reports task to check for consecutive zero counts in page reports ([1c659f4](https://github.com/ghorbani-mohammad/Django-Crawler-Framework/commit/1c659f40c0f16679674f5010c778b025ddb11892))
 
 
 
