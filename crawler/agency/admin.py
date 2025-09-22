@@ -137,7 +137,7 @@ class PageAdminForm(forms.ModelForm):
             "message_code": MonacoEditorWidget(
                 attrs={"data-wordwrap": "on", "data-language": "python"}
             ),
-            "url": forms.URLInput(attrs={"style": "width: 80%;"})
+            "url": forms.URLInput(attrs={"style": "width: 80%;"}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -145,7 +145,7 @@ class PageAdminForm(forms.ModelForm):
         if self.instance and self.instance.url:
             self.fields["url"].help_text = format_html(
                 '<a href="{url}" target="_blank" style="margin-left: 0px;">Link</a>',
-                url=self.instance.url
+                url=self.instance.url,
             )
 
 

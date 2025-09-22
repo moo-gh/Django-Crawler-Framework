@@ -9,6 +9,7 @@ import importlib
 import traceback
 from typing import Optional
 from datetime import timedelta
+from telegram.error import RetryAfter, TelegramError
 
 from django.conf import settings
 from django.utils import timezone
@@ -25,6 +26,11 @@ MINUTE = 60
 # caveat: at most the redis-exporter task should take 30 minutes
 # otherwise, we would have duplication of messages
 TASKS_TIMEOUT = 30 * MINUTE
+
+# Telegram rate limiting configuration
+TELEGRAM_MAX_RETRIES = 3
+TELEGRAM_BASE_DELAY = 1.0  # Base delay between messages in seconds
+TELEGRAM_RETRY_BUFFER = 2  # Extra seconds to add to Telegram's retry_after
 
 logger = get_task_logger(__name__)
 redis_news = redis.StrictRedis(host="crawler-redis", port=6379, db=0)
@@ -50,11 +56,16 @@ def reset_page_locks():
 
 @crawler.task(name="send_log_to_telegram")
 def send_log_to_telegram(message):
-    bot = not_models.TelegramBot.objects.first()
+    bot_model = not_models.TelegramBot.objects.first()
     account = not_models.TelegramAccount.objects.first()
-    if not (bot and account):
+    if not (bot_model and account):
         return
-    not_utils.telegram_bot_send_text(bot.telegram_token, account.chat_id, message)
+
+    # Use the same rate limiting approach for log messages
+    bot = telegram.Bot(token=bot_model.telegram_token)
+    success = send_telegram_message_with_retry(bot, account.chat_id, message)
+    if not success:
+        logger.error("Failed to send log message to Telegram after retries")
 
 
 def check_must_crawl(page: models.Page):
@@ -120,7 +131,9 @@ def check_agencies():
                 check_must_crawl(page)
 
 
-def register_log(description: str, error: str, page: models.Page, url: str, log_level: str = "error"):
+def register_log(
+    description: str, error: str, page: models.Page, url: str, log_level: str = "error"
+):
     if log_level == "error":
         logger.error("desc: %s\ntrace: %s", description, traceback.format_exc())
     elif log_level == "info":
@@ -223,6 +236,69 @@ def get_page_ignoring_tokens(page: models.Page) -> list["str"]:
     )
 
 
+def send_telegram_message_with_retry(
+    bot: telegram.Bot,
+    chat_id: str,
+    message: str,
+    max_retries: int = TELEGRAM_MAX_RETRIES,
+) -> bool:
+    """
+    Send a Telegram message with proper rate limiting and retry logic.
+
+    Args:
+        bot: Telegram bot instance
+        chat_id: Telegram chat/channel ID
+        message: Message text to send
+        max_retries: Maximum number of retry attempts
+
+    Returns:
+        bool: True if message was sent successfully, False otherwise
+    """
+    for attempt in range(max_retries + 1):
+        try:
+            bot.send_message(chat_id=chat_id, text=message)
+            logger.info(
+                f"Message sent successfully to {chat_id} on attempt {attempt + 1}"
+            )
+            return True
+
+        except RetryAfter as e:
+            retry_after = e.retry_after
+            logger.warning(
+                f"Rate limit hit. Telegram requires retry after {retry_after} seconds. Attempt {attempt + 1}/{max_retries + 1}"
+            )
+
+            if attempt < max_retries:
+                # Add some buffer time to the required wait time
+                sleep_time = retry_after + TELEGRAM_RETRY_BUFFER
+                logger.info(f"Waiting {sleep_time} seconds before retry...")
+                time.sleep(sleep_time)
+            else:
+                logger.error(
+                    f"Failed to send message after {max_retries + 1} attempts due to rate limiting"
+                )
+                return False
+
+        except TelegramError as e:
+            logger.error(f"Telegram error on attempt {attempt + 1}: {e}")
+            if attempt < max_retries:
+                # Use exponential backoff for other Telegram errors
+                sleep_time = (2**attempt) + 1
+                logger.info(f"Retrying in {sleep_time} seconds...")
+                time.sleep(sleep_time)
+            else:
+                logger.error(
+                    f"Failed to send message after {max_retries + 1} attempts due to Telegram error: {e}"
+                )
+                return False
+
+        except Exception as e:
+            logger.error(f"Unexpected error sending Telegram message: {e}")
+            return False
+
+    return False
+
+
 @crawler.task(name="redis_exporter")
 @only_one_concurrency(key="redis_exporter", timeout=TASKS_TIMEOUT)
 def redis_exporter():
@@ -271,10 +347,31 @@ def redis_exporter():
                     continue
                 # Check if message is empty or contains only whitespace
                 if not message or not message.strip():
-                    register_log("Empty message generated, skipping telegram send", "empty message", page, data["link"], "warning")
+                    register_log(
+                        "Empty message generated, skipping telegram send",
+                        "empty message",
+                        page,
+                        data["link"],
+                        "warning",
+                    )
                     continue
-                bot.send_message(chat_id=page.telegram_channel, text=message)
-                time.sleep(1.5)
+
+                # Send message with proper rate limiting
+                success = send_telegram_message_with_retry(
+                    bot, page.telegram_channel, message
+                )
+                if not success:
+                    register_log(
+                        "Failed to send message to Telegram after retries",
+                        "telegram send failed",
+                        page,
+                        data["link"],
+                        "error",
+                    )
+                    continue
+
+                # Add a small delay between messages to be respectful to Telegram's API
+                time.sleep(TELEGRAM_BASE_DELAY)
             except KeyError as error:
                 message = f"redis-exporter, key-error, code was: {temp_code}"
                 register_log(message, error, page, data["link"])
@@ -310,14 +407,15 @@ def monitor_page_reports():
 
     logger.info("monitor_page_reports started")
     warning_threshold = 5  # Number of consecutive zero counts to trigger warning
-    time_threshold = timezone.localtime() - timedelta(days=1)  # Look at reports from last 24 hours
-    
+    time_threshold = timezone.localtime() - timedelta(
+        days=1
+    )  # Look at reports from last 24 hours
+
     for page in models.Page.objects.filter(status=True):  # Only check active pages
         recent_reports = models.Report.objects.filter(
-            page=page,
-            created_at__gte=time_threshold
-        ).order_by('-created_at')[:warning_threshold]
-        
+            page=page, created_at__gte=time_threshold
+        ).order_by("-created_at")[:warning_threshold]
+
         if len(recent_reports) == warning_threshold:
             all_zero = all(report.new_links == 0 for report in recent_reports)
             if all_zero and page.telegram_channel:
@@ -326,13 +424,13 @@ def monitor_page_reports():
                     f"for {warning_threshold} consecutive crawls. Please check the crawling configuration.\n\n"
                     f"Last {warning_threshold} crawl results:\n"
                 )
-                
+
                 # Add details of each report
                 for i, report in enumerate(recent_reports, 1):
                     warning_message += (
                         f"{i}. Crawl at {report.created_at.strftime('%Y-%m-%d %H:%M:%S')} - "
                         f"Fetched: {report.fetched_links}, New: {report.new_links}\n"
                     )
-                
+
                 # Send warning using the existing send_log_to_telegram task
                 send_log_to_telegram.delay(warning_message)
