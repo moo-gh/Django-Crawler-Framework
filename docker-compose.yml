@@ -74,8 +74,8 @@ services:
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
       - JAVA_OPTS=-Dotel.traces.exporter=none
     shm_size: 2g
-    ports:
-      - 7900:7900
+    # ports:
+    #   - 7900:7900
     restart: unless-stopped
 
   crawler_selenium_hub:
