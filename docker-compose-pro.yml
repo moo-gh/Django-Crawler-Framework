@@ -81,7 +81,7 @@ services:
     restart: unless-stopped
 
   crawler_node_docker:
-    image: selenium/node-firefox:4.26.0-20241101
+    image: selenium/node-firefox:4.36.0-20251001
     container_name: crawler_node_docker
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -101,7 +101,7 @@ services:
     restart: unless-stopped
 
   crawler_selenium_hub:
-    image: selenium/hub:4.26.0-20241101
+    image: selenium/hub:4.36.0-20251001
     container_name: crawler-selenium-hub
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
