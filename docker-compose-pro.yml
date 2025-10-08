@@ -96,6 +96,8 @@ services:
     shm_size: 2g
     networks:
       - crawler_network
+    ports:
+      - 7920:7900
     restart: unless-stopped
 
   crawler_selenium_hub:
