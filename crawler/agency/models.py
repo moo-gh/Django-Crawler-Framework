@@ -1,4 +1,5 @@
 import importlib
+import logging
 from django.db import models
 from django.utils import timezone
 from django.template.defaultfilters import truncatechars
@@ -7,6 +8,9 @@ from django.template.defaultfilters import truncatechars
 from reusable.models import BaseModel
 from notification.models import MessageTemplate
 from . import utils
+
+
+logger = logging.getLogger(__name__)
 
 
 class Agency(BaseModel):
@@ -138,6 +142,7 @@ class Page(BaseModel):
 
         for off_time in todays_off_times:
             if off_time.start_time <= current_time_only <= off_time.end_time:
+                logger.info("Page %s is off-time at %s", self.name, current_time_only)
                 return True
         return False
 
