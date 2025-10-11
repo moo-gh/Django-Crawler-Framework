@@ -149,6 +149,7 @@ def register_log(
         url=url,
         phase=models.Log.SENDING,
         error=error,
+        level=log_level,
     )
 
 

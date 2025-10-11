@@ -195,6 +195,7 @@ class Log(BaseModel):
     url = models.CharField(max_length=2000, null=True)
     description = models.TextField(default="")
     error = models.TextField(null=True)
+    level = models.CharField(max_length=10, null=True)
 
     CRAWLING = "cra"
     SENDING = "sen"
@@ -214,7 +215,9 @@ class Log(BaseModel):
     def save(self, *args, **kwargs):
         tasks_module = importlib.import_module("agency.tasks")
         super().save(*args, **kwargs)
-        tasks_module.send_log_to_telegram.delay(self.log_message)
+        if self.level in ["error", "warning"]:
+            # no need to send log to telegram for debug logs
+            tasks_module.send_log_to_telegram.delay(self.log_message)
 
 
 class Option(BaseModel):
