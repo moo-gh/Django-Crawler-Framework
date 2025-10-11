@@ -349,7 +349,7 @@ def redis_exporter():
                 # Check if message is empty or contains only whitespace
                 if not message or not message.strip():
                     register_log(
-                        "Empty message generated, skipping telegram send",
+                        f"Empty message generated, skipping telegram send for {page.name} and url {data['link']}",
                         "empty message",
                         page,
                         data["link"],
