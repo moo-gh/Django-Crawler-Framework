@@ -222,7 +222,7 @@ class CrawlerEngine:
         self.fetched_links_count = len(data)
         self.report.fetched_links = self.fetched_links_count
         self.report.save()
-        self.logging(f"Fetched {len(data)} links, check them in report.")
+        self.logging(f"Fetched {len(data)} links for {self.page.url}, check them in {self.report.id} report.")
 
     def get_links(self, elements):
         data = []
