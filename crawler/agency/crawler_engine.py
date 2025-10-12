@@ -218,11 +218,11 @@ class CrawlerEngine:
         It is also used to save the fetched links to the redis database.
         It is also used to save the fetched links to the duplicate checker.
         """
-        self.logging(f"Fetched links are: {data}")
         self.fetched_links = data
         self.fetched_links_count = len(data)
         self.report.fetched_links = self.fetched_links_count
         self.report.save()
+        self.logging(f"Fetched {len(data)} links, check them in report.")
 
     def get_links(self, elements):
         data = []
