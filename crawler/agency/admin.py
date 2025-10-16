@@ -337,6 +337,7 @@ class OffTimeAdmin(ReadOnlyAdminDateFieldsMIXIN, admin.ModelAdmin):
         "created_at",
         "updated_at",
     )
+    list_editable = ("start_time", "end_time")
 
     def get_page_names(self, obj):
         """Return the names of pages related to this OffTime, separated by comma."""
