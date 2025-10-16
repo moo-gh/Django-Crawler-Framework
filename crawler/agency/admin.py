@@ -325,7 +325,7 @@ class DBLogEntryAdmin(admin.ModelAdmin):
 
 
 @admin.register(OffTime)
-class OffTimeAdmin(ReadOnlyAdminDateFieldsMIXIN, admin.ModelAdmin):
+class OffTimeAdmin(ReadOnlyAdminDateFieldsMIXIN):
     """Admin interface for OffTime model."""
 
     list_display = (
@@ -334,7 +334,6 @@ class OffTimeAdmin(ReadOnlyAdminDateFieldsMIXIN, admin.ModelAdmin):
         "start_time",
         "end_time",
         "get_page_names",
-        "created_at",
         "updated_at",
     )
     list_editable = ("start_time", "end_time")
@@ -348,14 +347,14 @@ class OffTimeAdmin(ReadOnlyAdminDateFieldsMIXIN, admin.ModelAdmin):
 
 
 @admin.register(Day)
-class DayAdmin(ReadOnlyAdminDateFieldsMIXIN, admin.ModelAdmin):
+class DayAdmin(ReadOnlyAdminDateFieldsMIXIN):
     """Admin interface for Day model."""
 
     list_display = ("id", "name", "abbreviation", "created_at")
 
 
 @admin.register(CrawlScheduling)
-class CrawlSchedulingAdmin(ReadOnlyAdminDateFieldsMIXIN, admin.ModelAdmin):
+class CrawlSchedulingAdmin(ReadOnlyAdminDateFieldsMIXIN):
     """Admin interface for CrawlScheduling model."""
 
     list_display = ("id", "page", "start_times", "days", "created_at")
