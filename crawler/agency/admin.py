@@ -333,9 +333,17 @@ class OffTimeAdmin(ReadOnlyAdminDateFieldsMIXIN, admin.ModelAdmin):
         "day_of_week",
         "start_time",
         "end_time",
+        "get_page_names",
         "created_at",
         "updated_at",
     )
+
+    def get_page_names(self, obj):
+        """Return the names of pages related to this OffTime, separated by comma."""
+        page_names = [page.masked_name for page in obj.pages.all()]
+        return ", ".join(page_names) if page_names else "-"
+
+    get_page_names.short_description = "Pages"
 
 
 @admin.register(Day)
