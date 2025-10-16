@@ -94,13 +94,13 @@ def check_agencies():
     task_interval_minutes = 5  # Adjust based on your Celery schedule
     time_window_start = now - timezone.timedelta(minutes=task_interval_minutes)
 
-    current_day = now.strftime(
-        "%a"
-    ).upper()  # Get current day abbreviation (e.g., "MON")
+    # Get current day abbreviation (e.g., "MON")
+    current_day = now.strftime("%a").upper()
+    # Generate a range of times to check
     current_time_range = [
         (time_window_start + timezone.timedelta(minutes=i)).strftime("%H:%M")
         for i in range(task_interval_minutes)
-    ]  # Generate a range of times to check
+    ]
 
     # Get all pages with active schedules matching the current day and time range
     schedules = models.CrawlScheduling.objects.all()
@@ -122,6 +122,7 @@ def check_agencies():
 
     for page in pages:
         if page.is_off_time:
+            logger.info(f"Page {page.url} is off-time, skipping")
             continue
         if page.last_crawl is None:
             check_must_crawl(page)
@@ -149,6 +150,7 @@ def register_log(
         url=url,
         phase=models.Log.SENDING,
         error=error,
+        level=log_level,
     )
 
 
@@ -348,7 +350,7 @@ def redis_exporter():
                 # Check if message is empty or contains only whitespace
                 if not message or not message.strip():
                     register_log(
-                        "Empty message generated, skipping telegram send",
+                        f"Empty message generated, skipping telegram send for {page.name} and url {data['link']}",
                         "empty message",
                         page,
                         data["link"],

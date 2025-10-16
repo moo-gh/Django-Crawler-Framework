@@ -1,4 +1,5 @@
 import importlib
+import logging
 from django.db import models
 from django.utils import timezone
 from django.template.defaultfilters import truncatechars
@@ -7,6 +8,9 @@ from django.template.defaultfilters import truncatechars
 from reusable.models import BaseModel
 from notification.models import MessageTemplate
 from . import utils
+
+
+logger = logging.getLogger(__name__)
 
 
 class Agency(BaseModel):
@@ -138,6 +142,7 @@ class Page(BaseModel):
 
         for off_time in todays_off_times:
             if off_time.start_time <= current_time_only <= off_time.end_time:
+                logger.info("Page %s is off-time at %s", self.name, current_time_only)
                 return True
         return False
 
@@ -190,6 +195,7 @@ class Log(BaseModel):
     url = models.CharField(max_length=2000, null=True)
     description = models.TextField(default="")
     error = models.TextField(null=True)
+    level = models.CharField(max_length=10, null=True)
 
     CRAWLING = "cra"
     SENDING = "sen"
@@ -209,7 +215,9 @@ class Log(BaseModel):
     def save(self, *args, **kwargs):
         tasks_module = importlib.import_module("agency.tasks")
         super().save(*args, **kwargs)
-        tasks_module.send_log_to_telegram.delay(self.log_message)
+        if self.level in ["error", "warning"]:
+            # no need to send log to telegram for debug logs
+            tasks_module.send_log_to_telegram.delay(self.log_message)
 
 
 class Option(BaseModel):
