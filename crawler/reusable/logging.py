@@ -21,13 +21,22 @@ class CustomAdminEmailHandler(AdminEmailHandler):
     Middleware, and Settings sections).
     """
 
+    def format_subject(self, subject):
+        """
+        Override to add 'Crawler Project - ' to the beginning of the subject.
+        """
+        # Call parent's format_subject first
+        formatted = super().format_subject(subject)
+        # Add prefix
+        return "Crawler Project - " + formatted
+
     def send_mail(self, subject, message, *args, **kwargs):
         """
         Override send_mail to filter out Django configuration from the message
         and customize the subject line.
         """
-        # Add "Crawler Project - " to the beginning of the subject
-        if subject.startswith("[Django] "):
+        # Ensure "Crawler Project - " is at the beginning (double check)
+        if not subject.startswith("Crawler Project - "):
             subject = "Crawler Project - " + subject
 
         # Filter out the verbose Django configuration sections
