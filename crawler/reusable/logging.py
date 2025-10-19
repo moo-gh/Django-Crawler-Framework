@@ -77,3 +77,44 @@ class CustomAdminEmailHandler(AdminEmailHandler):
         Return our custom exception reporter.
         """
         return CustomExceptionReporter
+    
+    def emit(self, record):
+        """
+        Override emit to filter out Django configuration from all error emails.
+        """
+        try:
+            # Call the parent emit to send the email
+            super().emit(record)
+        except Exception:
+            self.handleError(record)
+    
+    def format_subject(self, subject):
+        """
+        Override to customize the subject line.
+        """
+        return super().format_subject(subject)
+    
+    def send_mail(self, subject, message, *args, **kwargs):
+        """
+        Override send_mail to filter out Django configuration from the message.
+        """
+        # Filter out the verbose Django configuration sections
+        sections_to_remove = [
+            "\nDjango Version:",
+            "\n\nDjango Version:",
+            "Django Version:",
+        ]
+        
+        # Find the earliest section to remove
+        earliest_index = len(message)
+        for section in sections_to_remove:
+            index = message.find(section)
+            if index != -1 and index < earliest_index:
+                earliest_index = index
+        
+        # Trim the message to exclude unwanted sections
+        if earliest_index < len(message):
+            message = message[:earliest_index].rstrip()
+        
+        # Call the parent send_mail with the filtered message
+        return super().send_mail(subject, message, *args, **kwargs)
