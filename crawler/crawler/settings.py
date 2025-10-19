@@ -167,7 +167,7 @@ if EMAIL_HOST_USER and ADMIN_EMAIL_LOG:
         "handlers": {
             "mail_admins": {
                 "level": "ERROR",
-                "class": "django.utils.log.AdminEmailHandler",
+                "class": "reusable.logging.CustomAdminEmailHandler",
                 "formatter": "simple",
             },
             "log_db": {
