@@ -1,3 +1,12 @@
+# [1.59.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.58.0...v1.59.0) (2025-10-16)
+
+
+### Features
+
+* add get_page_names method to OffTimeAdmin ([6ada7c4](https://github.com/moo-gh/Django-Crawler-Framework/commit/6ada7c4199a475a8b0fbb74db5173f7bb7dfcae5))
+
+
+
 # [1.58.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.57.0...v1.58.0) (2025-10-11)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * add updated_at field to AgencyAdmin for improved tracking ([15b9f53](https://github.com/moo-gh/Django-Crawler-Framework/commit/15b9f53ee9300a1105231c5bc61ecafb04d8ae29))
-
-
-
-## [1.55.1](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.55.0...v1.55.1) (2025-06-09)
-
-
-### Bug Fixes
-
-* update data structure in CrawlerEngine to include link key ([5a2d4d0](https://github.com/moo-gh/Django-Crawler-Framework/commit/5a2d4d017f4c49f94775be6a1cdf0642f3f40d3e))
 
 
 

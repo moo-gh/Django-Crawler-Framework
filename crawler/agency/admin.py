@@ -325,7 +325,7 @@ class DBLogEntryAdmin(admin.ModelAdmin):
 
 
 @admin.register(OffTime)
-class OffTimeAdmin(ReadOnlyAdminDateFieldsMIXIN, admin.ModelAdmin):
+class OffTimeAdmin(ReadOnlyAdminDateFieldsMIXIN):
     """Admin interface for OffTime model."""
 
     list_display = (
@@ -333,20 +333,28 @@ class OffTimeAdmin(ReadOnlyAdminDateFieldsMIXIN, admin.ModelAdmin):
         "day_of_week",
         "start_time",
         "end_time",
-        "created_at",
+        "get_page_names",
         "updated_at",
     )
+    list_editable = ("start_time", "end_time")
+
+    def get_page_names(self, obj):
+        """Return the names of pages related to this OffTime, separated by comma."""
+        page_names = [page.masked_name for page in obj.pages.all()]
+        return ", ".join(page_names) if page_names else "-"
+
+    get_page_names.short_description = "Pages"
 
 
 @admin.register(Day)
-class DayAdmin(ReadOnlyAdminDateFieldsMIXIN, admin.ModelAdmin):
+class DayAdmin(ReadOnlyAdminDateFieldsMIXIN):
     """Admin interface for Day model."""
 
     list_display = ("id", "name", "abbreviation", "created_at")
 
 
 @admin.register(CrawlScheduling)
-class CrawlSchedulingAdmin(ReadOnlyAdminDateFieldsMIXIN, admin.ModelAdmin):
+class CrawlSchedulingAdmin(ReadOnlyAdminDateFieldsMIXIN):
     """Admin interface for CrawlScheduling model."""
 
     list_display = ("id", "page", "start_times", "days", "created_at")
