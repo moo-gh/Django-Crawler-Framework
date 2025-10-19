@@ -37,12 +37,16 @@ class CustomExceptionReporter(ExceptionReporter):
     def get_traceback_text(self):
         """
         Override to provide cleaner text output without verbose settings.
-        Removes: Installed Applications, Installed Middleware, and Settings sections.
+        Removes: Django Version, Python info, Installed Applications, Middleware, and Settings.
         """
         full_traceback = super().get_traceback_text()
         
-        # Remove the verbose configuration sections
+        # Remove all the verbose configuration sections
+        # Split at "Django Version:" which comes before all the unwanted sections
         sections_to_remove = [
+            "\nDjango Version:",
+            "\n\nDjango Version:",
+            "Django Version:",
             "Installed Applications:",
             "Installed Middleware:",
             "Settings:",
