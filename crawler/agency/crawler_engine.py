@@ -229,7 +229,17 @@ class CrawlerEngine:
     def get_links(self, elements):
         data = []
         if self.page.structure.news_links_code != "":
-            exec(self.page.structure.news_links_code)  # pylint: disable=exec-used
+            try:
+                exec(self.page.structure.news_links_code)  # pylint: disable=exec-used
+            except Exception as e:
+                error_trace = traceback.format_exc()
+                self.register_log(
+                    f"Error executing code: {self.page.structure.news_links_code}\n{error_trace}",
+                    str(e),
+                    self.page,
+                    self.page.url,
+                )
+                return []
         else:
             for element in elements:
                 data.append({"link": element["href"]})
