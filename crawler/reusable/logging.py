@@ -30,9 +30,36 @@ class CustomExceptionReporter(ExceptionReporter):
 
         # Remove the verbose configuration sections from error emails
         # This removes: Installed Applications, Installed Middleware, and Settings
-        data["settings"] = {}  # Empty dict to avoid template errors
+        data["settings"] = []  # Empty list since Django expects a list of tuples
 
         return data
+    
+    def get_traceback_text(self):
+        """
+        Override to provide cleaner text output without verbose settings.
+        Removes: Installed Applications, Installed Middleware, and Settings sections.
+        """
+        full_traceback = super().get_traceback_text()
+        
+        # Remove the verbose configuration sections
+        sections_to_remove = [
+            "Installed Applications:",
+            "Installed Middleware:",
+            "Settings:",
+        ]
+        
+        # Find the earliest section to remove
+        earliest_index = len(full_traceback)
+        for section in sections_to_remove:
+            index = full_traceback.find(section)
+            if index != -1 and index < earliest_index:
+                earliest_index = index
+        
+        # Return everything before the first unwanted section
+        if earliest_index < len(full_traceback):
+            return full_traceback[:earliest_index].rstrip()
+        
+        return full_traceback
 
 
 class CustomAdminEmailHandler(AdminEmailHandler):
