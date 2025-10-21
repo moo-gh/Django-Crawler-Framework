@@ -10,6 +10,8 @@ from django.contrib import messages
 from django.utils.html import format_html
 from django.utils.translation import ngettext
 from django.template.defaultfilters import truncatechars
+from django.urls import reverse
+from django.http import HttpResponseRedirect
 from djangoeditorwidgets.widgets import MonacoEditorWidget
 
 from reusable.admins import ReadOnlyAdminDateFieldsMIXIN
@@ -156,7 +158,13 @@ class PageAdmin(ReadOnlyAdminDateFieldsMIXIN):
     form = PageAdminForm
     list_filter = ("lock", "status", "agency")
     list_editable = ("load_sleep", "links_sleep", "status", "crawl_interval")
-    readonly_fields = ("last_crawl", "created_at", "updated_at", "deleted_at")
+    readonly_fields = (
+        "last_crawl",
+        "created_at",
+        "updated_at",
+        "deleted_at",
+        "crawl_buttons",
+    )
     list_display = (
         "get_masked_name",
         "agency",
@@ -185,6 +193,7 @@ class PageAdmin(ReadOnlyAdminDateFieldsMIXIN):
         ("filtering_tags", "off_times"),
         "message_template",
         "last_crawl",
+        "crawl_buttons",
         ("created_at", "updated_at", "deleted_at"),
     )
 
@@ -217,6 +226,54 @@ class PageAdmin(ReadOnlyAdminDateFieldsMIXIN):
         if instance.last_crawl_count:
             return instance.last_crawl_count
         return None
+
+    @admin.display(description="Crawl Actions")
+    def crawl_buttons(self, obj):
+        """Display action buttons for crawling."""
+        if obj.pk:  # Only show buttons if object exists
+            return format_html(
+                '''
+                <div style="display: flex; gap: 10px; margin: 10px 0;">
+                    <a href="?action=crawl" class="button" style="padding: 10px 15px; background-color: #417690; color: white; text-decoration: none; border-radius: 4px;">
+                        Crawl Page
+                    </a>
+                    <a href="?action=crawl_repetitive" class="button" style="padding: 10px 15px; background-color: #417690; color: white; text-decoration: none; border-radius: 4px;">
+                        Crawl Page (Repetitive)
+                    </a>
+                </div>
+                '''
+            )
+        return "-"
+
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        """Override change view to handle custom actions."""
+        action = request.GET.get("action")
+        if action in ["crawl", "crawl_repetitive"]:
+            obj = self.get_object(request, object_id)
+            if obj:
+                tasks_module = importlib.import_module("agency.tasks")
+                if action == "crawl":
+                    tasks_module.page_crawl.delay(PageSerializer(obj).data)
+                    self.message_user(
+                        request,
+                        f"Page '{obj.masked_name}' is in queue to crawl.",
+                        messages.SUCCESS,
+                    )
+                elif action == "crawl_repetitive":
+                    tasks_module.page_crawl_repetitive.delay(PageSerializer(obj).data)
+                    self.message_user(
+                        request,
+                        f"Page '{obj.masked_name}' is in queue to crawl. (repetitive)",
+                        messages.SUCCESS,
+                    )
+                # Redirect to remove action parameter from URL
+                return HttpResponseRedirect(
+                    reverse(
+                        "admin:agency_page_change",
+                        args=[object_id],
+                    )
+                )
+        return super().change_view(request, object_id, form_url, extra_context)
 
     # actions
     def crawl_action(self, request, queryset):
