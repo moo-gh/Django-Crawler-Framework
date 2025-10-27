@@ -234,7 +234,7 @@ class CrawlerEngine:
             except Exception as e:
                 error_trace = traceback.format_exc()
                 self.register_log(
-                    f"Error executing code: {self.page.structure.news_links_code}\n{error_trace}",
+                    f"Error executing code:\n{self.page.structure.news_links_code}\n{error_trace}",
                     str(e),
                     self.page,
                     self.page.url,
@@ -359,8 +359,8 @@ class CrawlerEngine:
             # Execute the code, making 'article', 'key', and 'doc' available within the code
             exec(code, {"article": article, "key": key, "doc": doc})
         except Exception as e:
-            logger.error(f"Error executing code: {code} for link {link}", exc_info=True)
-            self.register_log(f"Error in code execution: {code}", e, self.page, link)
+            logger.error(f"Error executing code:\n{code}\nfor link {link}", exc_info=True)
+            self.register_log(f"Error in code execution:\n{code}", e, self.page, link)
 
     def log_missing_element(self, tag, attribute, link):
         """Log when a tag or element is missing from the document."""
