@@ -259,7 +259,7 @@ def send_telegram_message_with_retry(
     for attempt in range(max_retries + 1):
         try:
             bot.send_message(chat_id=chat_id, text=message)
-            logger.info(
+            logger.debug(
                 f"Message sent successfully to {chat_id} on attempt {attempt + 1}"
             )
             return True
