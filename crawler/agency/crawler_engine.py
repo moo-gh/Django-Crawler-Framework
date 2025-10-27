@@ -77,10 +77,10 @@ class CrawlerEngine:
             )
         except SessionNotCreatedException:
             # TODO: Custom handling
-            self.logging(traceback.format_exc())
+            self.logging(traceback.format_exc(), "error")
             return False
         except Exception:
-            self.logging(traceback.format_exc())
+            self.logging(traceback.format_exc(), "error")
             return False
         self.driver.header_overrides = utils.DEFAULT_HEADER
         return True
@@ -165,14 +165,14 @@ class CrawlerEngine:
                 else:
                     error = f"Page: {self.page.url}\n\nFailed to load after {max_retries} attempts"
                     logger.error(error)
-                    self.logging(error)
+                    self.logging(error, "error")
                     return False
 
             except TimeoutException as error:
                 if attempt < max_retries - 1:
                     self.logging(
                         f"Timeout on attempt {attempt + 1}, retrying in {retry_delay} seconds..."
-                    )
+                    , "error")
                     time.sleep(retry_delay)
                     retry_delay *= 2
                 else:
@@ -199,7 +199,7 @@ class CrawlerEngine:
         if "code" in attribute.keys():
             del attribute["code"]
         elements = doc.findAll(tag, attribute)
-        self.logging(f"length of elements is: {len(elements)}")
+        self.logging(f"length of elements is: {len(elements)}", "debug")
         return elements
 
     def do_scroll(self):
@@ -208,7 +208,7 @@ class CrawlerEngine:
         """
         if not self.page.scroll:
             return
-        self.logging(f"Scrolling {self.page.scroll} times")
+        self.logging(f"Scrolling {self.page.scroll} times", "debug")
         scroll(self.driver, self.page.scroll)
 
     def post_crawling(self, data):
@@ -250,18 +250,18 @@ class CrawlerEngine:
         this function get links using the specified structure from a page
         """
         success = self.land_page()
-        self.logging(f"land page success: {success}")
+        self.logging(f"land page success: {success}", "debug")
         if not success:
             return
 
         self.do_scroll()
 
         time.sleep(self.page.links_sleep)
-        self.logging(f"sleep for {self.page.links_sleep} success")
+        self.logging(f"sleep for {self.page.links_sleep} success", "debug")
 
         self.taking_picture()
         elements = self.get_elements()
-        self.logging(f"get elements success and length is: {len(elements)}")
+        self.logging(f"get elements success and length is: {len(elements)}", "debug")
         data = self.get_links(elements)
         self.post_crawling(data)
 
@@ -320,7 +320,7 @@ class CrawlerEngine:
                         if attempt < max_retries - 1:
                             self.logging(
                                 f"Element not found for {key}, retrying in {retry_delay} seconds..."
-                            )
+                            , "error")
                             time.sleep(retry_delay)
                             # Refresh the page source and try again
                             doc = BeautifulSoup(self.driver.page_source, "html.parser")
@@ -341,7 +341,7 @@ class CrawlerEngine:
                     if attempt < max_retries - 1:
                         self.logging(
                             f"Error extracting {key} on attempt {attempt + 1}, retrying in {retry_delay} seconds..."
-                        )
+                        , "error")
                         time.sleep(retry_delay)
                         # Refresh the page source and try again
                         doc = BeautifulSoup(self.driver.page_source, "html.parser")
@@ -410,8 +410,15 @@ class CrawlerEngine:
         self.report.log = self.log_messages
         self.report.save()
 
-    def logging(self, message):
-        logger.info(message)
+    def logging(self, message, level: str = "info"):
+        if level == "info":
+            logger.info(message)
+        elif level == "error":
+            logger.error(message)
+        elif level == "warning":
+            logger.warning(message)
+        elif level == "debug":
+            logger.debug(message)
         self.log_messages += f"{message} \n\n"
 
     def run(self):
