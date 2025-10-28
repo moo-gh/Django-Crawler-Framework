@@ -136,17 +136,12 @@ class Page(BaseModel):
 
         current_day = current_time.weekday()  # Monday is 0 and Sunday is 6
         current_time_only = current_time.time()
-        logger.info("Current day: %s, current time: %s", current_day, current_time_only)
 
         # Filter off times for the current day
         todays_off_times = self.off_times.filter(day_of_week=current_day)
-        logger.info("Todays off times: %s", todays_off_times)
 
         for off_time in todays_off_times:
-            logger.info("Off time: %s", off_time)
-            logger.info("Off time start time: %s, off time end time: %s", off_time.start_time, off_time.end_time)
             if off_time.start_time <= current_time_only <= off_time.end_time:
-                logger.info("Page %s is off-time at %s", self.name, current_time_only)
                 return True
         return False
 

@@ -110,7 +110,7 @@ def check_agencies():
         times = schedule.get_start_times()  # Split times into a list
 
         if current_day in days and any(time in current_time_range for time in times):
-            logger.info("Crawling page %s because of schedule", schedule.page.url)
+            logger.debug("Crawling page %s because of schedule", schedule.page.url)
             crawl(schedule.page)
 
     # Filter pages based on the matched page IDs
@@ -122,15 +122,19 @@ def check_agencies():
     )
 
     for page in pages:
-        logger.info("Checking page %s, is_off_time: %s, last_crawl: %s, crawl_interval: %s", page.url, page.is_off_time, page.last_crawl, page.crawl_interval)
+        logger.debug(
+            "Checking page %s, is_off_time: %s, last_crawl: %s, crawl_interval: %s",
+            page.url,
+            page.is_off_time,
+            page.last_crawl,
+            page.crawl_interval,
+        )
         if page.is_off_time:
-            logger.info(f"Page {page.url} is off-time, skipping")
             continue
         if page.last_crawl is None:
             check_must_crawl(page)
         else:
             diff_minute = int((now - page.last_crawl).total_seconds() / 60)
-            logger.info("Diff minute: %s, crawl interval: %s", diff_minute, page.crawl_interval)
             if diff_minute >= page.crawl_interval:
                 check_must_crawl(page)
 

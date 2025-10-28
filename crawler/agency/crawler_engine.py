@@ -171,8 +171,9 @@ class CrawlerEngine:
             except TimeoutException as error:
                 if attempt < max_retries - 1:
                     self.logging(
-                        f"Timeout on attempt {attempt + 1}, retrying in {retry_delay} seconds..."
-                    , "error")
+                        f"Timeout on attempt {attempt + 1}, retrying in {retry_delay} seconds...",
+                        "error",
+                    )
                     time.sleep(retry_delay)
                     retry_delay *= 2
                 else:
@@ -319,8 +320,9 @@ class CrawlerEngine:
                     if not element:
                         if attempt < max_retries - 1:
                             self.logging(
-                                f"Element not found for {key}, retrying in {retry_delay} seconds..."
-                            , "error")
+                                f"Element not found for {key}, retrying in {retry_delay} seconds...",
+                                "error",
+                            )
                             time.sleep(retry_delay)
                             # Refresh the page source and try again
                             doc = BeautifulSoup(self.driver.page_source, "html.parser")
@@ -340,8 +342,9 @@ class CrawlerEngine:
                 except Exception as e:
                     if attempt < max_retries - 1:
                         self.logging(
-                            f"Error extracting {key} on attempt {attempt + 1}, retrying in {retry_delay} seconds..."
-                        , "error")
+                            f"Error extracting {key} on attempt {attempt + 1}, retrying in {retry_delay} seconds...",
+                            "error",
+                        )
                         time.sleep(retry_delay)
                         # Refresh the page source and try again
                         doc = BeautifulSoup(self.driver.page_source, "html.parser")
@@ -359,7 +362,9 @@ class CrawlerEngine:
             # Execute the code, making 'article', 'key', and 'doc' available within the code
             exec(code, {"article": article, "key": key, "doc": doc})
         except Exception as e:
-            logger.error(f"Error executing code:\n{code}\nfor link {link}", exc_info=True)
+            logger.error(
+                f"Error executing code:\n{code}\nfor link {link}", exc_info=True
+            )
             self.register_log(f"Error in code execution:\n{code}", e, self.page, link)
 
     def log_missing_element(self, tag, attribute, link):

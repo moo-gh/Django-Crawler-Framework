@@ -232,7 +232,7 @@ class PageAdmin(ReadOnlyAdminDateFieldsMIXIN):
         """Display action buttons for crawling."""
         if obj.pk:  # Only show buttons if object exists
             return format_html(
-                '''
+                """
                 <div style="display: flex; gap: 10px; margin: 10px 0;">
                     <a href="?action=crawl" class="button" style="padding: 10px 15px; background-color: #417690; color: white; text-decoration: none; border-radius: 4px;">
                         Crawl Page
@@ -241,7 +241,7 @@ class PageAdmin(ReadOnlyAdminDateFieldsMIXIN):
                         Crawl Page (Repetitive)
                     </a>
                 </div>
-                '''
+                """
             )
         return "-"
 
