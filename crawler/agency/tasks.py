@@ -110,6 +110,7 @@ def check_agencies():
         times = schedule.get_start_times()  # Split times into a list
 
         if current_day in days and any(time in current_time_range for time in times):
+            logger.info("Crawling page %s because of schedule", schedule.page.url)
             crawl(schedule.page)
 
     # Filter pages based on the matched page IDs
