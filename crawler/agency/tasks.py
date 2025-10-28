@@ -122,6 +122,7 @@ def check_agencies():
     )
 
     for page in pages:
+        logger.info("Checking page %s, is_off_time: %s, last_crawl: %s, crawl_interval: %s", page.url, page.is_off_time, page.last_crawl, page.crawl_interval)
         if page.is_off_time:
             logger.info(f"Page {page.url} is off-time, skipping")
             continue
@@ -129,6 +130,7 @@ def check_agencies():
             check_must_crawl(page)
         else:
             diff_minute = int((now - page.last_crawl).total_seconds() / 60)
+            logger.info("Diff minute: %s, crawl interval: %s", diff_minute, page.crawl_interval)
             if diff_minute >= page.crawl_interval:
                 check_must_crawl(page)
 
