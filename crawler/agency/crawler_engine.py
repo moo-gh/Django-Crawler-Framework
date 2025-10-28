@@ -290,7 +290,7 @@ class CrawlerEngine:
             if meta:
                 self.extract_meta_data(meta, doc, article, data["link"])
 
-        logger.info(f"crawl_one_page: {article}")
+        self.logging(f"crawl_one_page: {article}", "debug")
         self.save_to_redis(article)
 
     def extract_meta_data(self, meta, doc, article, link):
