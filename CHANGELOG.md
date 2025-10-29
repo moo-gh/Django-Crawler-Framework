@@ -1,3 +1,12 @@
+# [1.61.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.60.0...v1.61.0) (2025-10-29)
+
+
+### Features
+
+* add last_crawl_new_count field to Page model and corresponding migration ([a900ed6](https://github.com/moo-gh/Django-Crawler-Framework/commit/a900ed628e3ed4aec89d2e118651c709b9d0f63b))
+
+
+
 # [1.60.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.59.0...v1.60.0) (2025-10-21)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * implement Telegram message sending with retry logic and rate limiting ([094f00b](https://github.com/moo-gh/Django-Crawler-Framework/commit/094f00ba1e0b1e01c1c63731e24316de281c1414))
-
-
-
-## [1.56.1](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.56.0...v1.56.1) (2025-09-21)
-
-
-### Bug Fixes
-
-* add check for empty messages in redis_exporter to prevent sending blank telegram notifications ([bf29957](https://github.com/moo-gh/Django-Crawler-Framework/commit/bf29957b89eda2ba158ee3c6203feeb57ab960a6))
 
 
 
