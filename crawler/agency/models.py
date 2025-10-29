@@ -79,6 +79,7 @@ class Page(BaseModel):
     )
     last_crawl = models.DateTimeField(null=True)
     last_crawl_count = models.PositiveIntegerField(null=True, blank=True)
+    last_crawl_new_count = models.PositiveIntegerField(null=True, blank=True)
     status = models.BooleanField(default=1)
     fetch_content = models.BooleanField(default=1)
     structure = models.ForeignKey(

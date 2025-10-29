@@ -404,6 +404,7 @@ class CrawlerEngine:
             self.crawl_one_page(data, self.page.fetch_content)
         self.page.last_crawl = timezone.localtime()
         self.page.last_crawl_count = self.fetched_links_count
+        self.page.last_crawl_new_count = counter
         self.page.lock = False
         self.page.save()
         self.finalize_report(counter)
