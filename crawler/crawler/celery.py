@@ -49,6 +49,6 @@ crawler.conf.beat_schedule = {
     },
     "monitor-page-reports": {
         "task": "monitor_page_reports",
-        "schedule": crontab(minute=0, hour="*/12"),
+        "schedule": crontab(minute=0, hour="*/11"),
     },
 }
