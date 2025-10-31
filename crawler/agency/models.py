@@ -79,6 +79,7 @@ class Page(BaseModel):
     )
     last_crawl = models.DateTimeField(null=True)
     last_crawl_count = models.PositiveIntegerField(null=True, blank=True)
+    last_crawl_new_count = models.PositiveIntegerField(null=True, blank=True)
     status = models.BooleanField(default=1)
     fetch_content = models.BooleanField(default=1)
     structure = models.ForeignKey(
@@ -142,7 +143,6 @@ class Page(BaseModel):
 
         for off_time in todays_off_times:
             if off_time.start_time <= current_time_only <= off_time.end_time:
-                logger.info("Page %s is off-time at %s", self.name, current_time_only)
                 return True
         return False
 

@@ -174,6 +174,7 @@ class PageAdmin(ReadOnlyAdminDateFieldsMIXIN):
         "load_sleep",
         "last_crawl",
         "get_last_crawl_count",
+        "get_last_crawl_new_count",
         "status",
         "today_crawl_count",
         "use_proxy",
@@ -227,12 +228,19 @@ class PageAdmin(ReadOnlyAdminDateFieldsMIXIN):
             return instance.last_crawl_count
         return None
 
+    @admin.display(description="L. New Count")
+    def get_last_crawl_new_count(self, instance):
+        """Get the last crawl new count if available."""
+        if instance.last_crawl_new_count:
+            return instance.last_crawl_new_count
+        return None
+
     @admin.display(description="Crawl Actions")
     def crawl_buttons(self, obj):
         """Display action buttons for crawling."""
         if obj.pk:  # Only show buttons if object exists
             return format_html(
-                '''
+                """
                 <div style="display: flex; gap: 10px; margin: 10px 0;">
                     <a href="?action=crawl" class="button" style="padding: 10px 15px; background-color: #417690; color: white; text-decoration: none; border-radius: 4px;">
                         Crawl Page
@@ -241,7 +249,7 @@ class PageAdmin(ReadOnlyAdminDateFieldsMIXIN):
                         Crawl Page (Repetitive)
                     </a>
                 </div>
-                '''
+                """
             )
         return "-"
 

@@ -110,6 +110,7 @@ def check_agencies():
         times = schedule.get_start_times()  # Split times into a list
 
         if current_day in days and any(time in current_time_range for time in times):
+            logger.debug("Crawling page %s because of schedule", schedule.page.url)
             crawl(schedule.page)
 
     # Filter pages based on the matched page IDs
@@ -121,8 +122,14 @@ def check_agencies():
     )
 
     for page in pages:
+        logger.debug(
+            "Checking page %s, is_off_time: %s, last_crawl: %s, crawl_interval: %s",
+            page.url,
+            page.is_off_time,
+            page.last_crawl,
+            page.crawl_interval,
+        )
         if page.is_off_time:
-            logger.info(f"Page {page.url} is off-time, skipping")
             continue
         if page.last_crawl is None:
             check_must_crawl(page)
@@ -259,7 +266,7 @@ def send_telegram_message_with_retry(
     for attempt in range(max_retries + 1):
         try:
             bot.send_message(chat_id=chat_id, text=message)
-            logger.info(
+            logger.debug(
                 f"Message sent successfully to {chat_id} on attempt {attempt + 1}"
             )
             return True
