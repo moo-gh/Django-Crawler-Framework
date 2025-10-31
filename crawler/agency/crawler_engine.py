@@ -227,6 +227,9 @@ class CrawlerEngine:
         )
 
     def get_links(self, elements):
+        """
+        Get links from the page based on the structure.
+        """
         data = []
         if self.page.structure.news_links_code != "":
             try:
