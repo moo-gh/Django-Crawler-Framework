@@ -1,3 +1,12 @@
+## [1.61.1](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.61.0...v1.61.1) (2025-10-31)
+
+
+### Bug Fixes
+
+* update schedule for monitor-page-reports task to run every 11 hours ([f895bba](https://github.com/moo-gh/Django-Crawler-Framework/commit/f895bba9285e9b142cb0c89fc6842e2149c57e40))
+
+
+
 # [1.61.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.60.0...v1.61.0) (2025-10-29)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * add log level field and conditional Telegram notifications ([53503c5](https://github.com/moo-gh/Django-Crawler-Framework/commit/53503c52d9e8129c4faf81d6b23fc703a23ceb9c))
-
-
-
-# [1.57.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.56.1...v1.57.0) (2025-09-22)
-
-
-### Features
-
-* implement Telegram message sending with retry logic and rate limiting ([094f00b](https://github.com/moo-gh/Django-Crawler-Framework/commit/094f00ba1e0b1e01c1c63731e24316de281c1414))
 
 
 
