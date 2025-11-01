@@ -1,3 +1,12 @@
+# [1.62.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.61.1...v1.62.0) (2025-11-01)
+
+
+### Features
+
+* **ai:** add AI module with LLM model and usage tracking ([d49ef02](https://github.com/moo-gh/Django-Crawler-Framework/commit/d49ef02b9e87c0116ad41beef22d6a8288fd347d))
+
+
+
 ## [1.61.1](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.61.0...v1.61.1) (2025-10-31)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * add get_page_names method to OffTimeAdmin ([6ada7c4](https://github.com/moo-gh/Django-Crawler-Framework/commit/6ada7c4199a475a8b0fbb74db5173f7bb7dfcae5))
-
-
-
-# [1.58.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.57.0...v1.58.0) (2025-10-11)
-
-
-### Features
-
-* add log level field and conditional Telegram notifications ([53503c5](https://github.com/moo-gh/Django-Crawler-Framework/commit/53503c52d9e8129c4faf81d6b23fc703a23ceb9c))
 
 
 
