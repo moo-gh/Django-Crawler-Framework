@@ -158,12 +158,12 @@ class CrawlerEngine:
 
                 if attempt < max_retries - 1:
                     self.logging(
-                        f"Page load attempt {attempt + 1} failed, retrying in {retry_delay} seconds..."
+                        f"Page load attempt {attempt + 1} failed for {self.page.url}, retrying in {retry_delay} seconds..."
                     )
                     time.sleep(retry_delay)
                     retry_delay *= 2  # Exponential backoff
                 else:
-                    error = f"Page: {self.page.url}\n\nFailed to load after {max_retries} attempts"
+                    error = f"Failed to load {self.page.url} after {max_retries} attempts"
                     logger.error(error)
                     self.logging(error, "error")
                     return False
@@ -171,14 +171,14 @@ class CrawlerEngine:
             except TimeoutException as error:
                 if attempt < max_retries - 1:
                     self.logging(
-                        f"Timeout on attempt {attempt + 1}, retrying in {retry_delay} seconds...",
+                        f"Timeout while loading {self.page.url} on attempt {attempt + 1}, retrying in {retry_delay} seconds...",
                         "error",
                     )
                     time.sleep(retry_delay)
                     retry_delay *= 2
                 else:
                     error = traceback.format_exc()
-                    error = f"Page: {self.page.url}\n\nTimeoutException after {max_retries} attempts: {error}"
+                    error = f"Timeout while loading {self.page.url} after {max_retries} attempts: {error}"
                     logger.error(error)
                     self.logging(error)
                     return False
