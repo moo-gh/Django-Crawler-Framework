@@ -163,7 +163,9 @@ class CrawlerEngine:
                     time.sleep(retry_delay)
                     retry_delay *= 2  # Exponential backoff
                 else:
-                    error = f"Failed to load {self.page.url} after {max_retries} attempts"
+                    error = (
+                        f"Failed to load {self.page.url} after {max_retries} attempts"
+                    )
                     logger.error(error)
                     self.logging(error, "error")
                     return False
