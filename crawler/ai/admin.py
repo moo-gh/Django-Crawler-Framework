@@ -6,7 +6,7 @@ from ai.models import LLMModel, LLMUsage
 
 @admin.register(LLMModel)
 class LLMModelAdmin(ReadOnlyAdminDateFieldsMIXIN):
-    list_display = ("name", "provider", "input_token_price", "output_token_price")
+    list_display = ("pk", "name", "provider", "input_token_price", "output_token_price")
     list_filter = ("provider",)
     search_fields = ("name",)
 
@@ -14,6 +14,7 @@ class LLMModelAdmin(ReadOnlyAdminDateFieldsMIXIN):
 @admin.register(LLMUsage)
 class LLMUsageAdmin(ReadOnlyAdminDateFieldsMIXIN):
     list_display = (
+        "pk",
         "model",
         "usage_type",
         "prompt_tokens",
