@@ -81,7 +81,6 @@ class LLMModel(BaseModel):
         return cls.objects.filter(is_active=True).first()
 
 
-# Create your models here.
 class LLMUsage(BaseModel):
     """Track individual LLM API calls and their costs."""
 
