@@ -174,15 +174,14 @@ class CrawlerEngine:
                 if attempt < max_retries - 1:
                     self.logging(
                         f"Timeout while loading {self.page.url} on attempt {attempt + 1}, retrying in {retry_delay} seconds...",
-                        "error",
+                        "warning",
                     )
                     time.sleep(retry_delay)
                     retry_delay *= 2
                 else:
                     error = traceback.format_exc()
                     error = f"Timeout while loading {self.page.url} after {max_retries} attempts: {error}"
-                    logger.error(error)
-                    self.logging(error)
+                    self.logging(error, "error")
                     return False
         return True
 
