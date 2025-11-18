@@ -325,7 +325,7 @@ class CrawlerEngine:
                         if attempt < max_retries - 1:
                             self.logging(
                                 f"Element not found for {key}, retrying in {retry_delay} seconds...",
-                                "error",
+                                "warning",
                             )
                             time.sleep(retry_delay)
                             # Refresh the page source and try again
