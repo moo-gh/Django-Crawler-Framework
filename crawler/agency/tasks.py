@@ -289,11 +289,12 @@ def send_telegram_message_with_retry(
                 return False
 
         except TelegramError as e:
-            logger.error(f"Telegram error on attempt {attempt + 1}: {e}")
             if attempt < max_retries:
                 # Use exponential backoff for other Telegram errors
                 sleep_time = (2**attempt) + 1
-                logger.info(f"Retrying in {sleep_time} seconds...")
+                logger.warning(
+                    f"Telegram error on attempt {attempt + 1}: {e}, retrying in {sleep_time} seconds..."
+                )
                 time.sleep(sleep_time)
             else:
                 logger.error(
