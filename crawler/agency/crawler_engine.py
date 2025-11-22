@@ -236,6 +236,10 @@ class CrawlerEngine:
         if self.page.structure.news_links_code != "":
             try:
                 exec(self.page.structure.news_links_code)  # pylint: disable=exec-used
+            except TimeoutException as e:
+                error_trace = traceback.format_exc()
+                self.logging(f"Timeout while executing code: {error_trace} \n {self.page.structure.news_links_code}", "warning")
+                return []
             except Exception as e:
                 error_trace = traceback.format_exc()
                 self.register_log(
