@@ -156,19 +156,19 @@ class CrawlerEngine:
                 if self.driver.find_elements(By.TAG_NAME, "body"):
                     return True
 
-                if attempt < max_retries - 1:
-                    self.logging(
-                        f"Page load attempt {attempt + 1} failed for {self.page.url}, retrying in {retry_delay} seconds..."
-                    )
-                    time.sleep(retry_delay)
-                    retry_delay *= 2  # Exponential backoff
-                else:
-                    error = (
-                        f"Failed to load {self.page.url} after {max_retries} attempts"
-                    )
-                    logger.error(error)
-                    self.logging(error, "error")
-                    return False
+                # if attempt < max_retries - 1:
+                #     self.logging(
+                #         f"Page load attempt {attempt + 1} failed for {self.page.url}, retrying in {retry_delay} seconds..."
+                #     )
+                #     time.sleep(retry_delay)
+                #     retry_delay *= 2  # Exponential backoff
+                # else:
+                #     error = (
+                #         f"Failed to load {self.page.url} after {max_retries} attempts"
+                #     )
+                #     logger.error(error)
+                #     self.logging(error, "error")
+                #     return False
 
             except TimeoutException as error:
                 if attempt < max_retries - 1:
