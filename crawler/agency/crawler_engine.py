@@ -156,6 +156,9 @@ class CrawlerEngine:
                 if self.driver.find_elements(By.TAG_NAME, "body"):
                     return True
 
+                # probably failure to load the page
+                return False
+
                 # if attempt < max_retries - 1:
                 #     self.logging(
                 #         f"Page load attempt {attempt + 1} failed for {self.page.url}, retrying in {retry_delay} seconds..."
