@@ -11,13 +11,11 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-
       - name: conventional changelog action
         id: changelog
         uses: TriPSs/conventional-changelog-action@latest
         with:
           github-token: "${{secrets.GITHUB_TOKEN}}"
-
       - name: create release
         uses: softprops/action-gh-release@v1
         if: ${{steps.changelog.outputs.skipped == 'false'}}
