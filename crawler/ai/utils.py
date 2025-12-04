@@ -5,13 +5,42 @@ from typing import Optional
 from openai import OpenAI
 from django.conf import settings
 
-from ai.models import LLMUsage
+from ai.models import LLMModel, LLMUsage
+
+
+def _get_llm_model(model_name: str) -> LLMModel:
+    """
+    Retrieve or lazily create an LLMModel entry for the given model name.
+    Ensures usage tracking always has a valid foreign key reference.
+    """
+    existing_model = LLMModel.get_by_name(model_name)
+    if existing_model:
+        return existing_model
+
+    llm_model, _ = LLMModel.objects.get_or_create(
+        name=model_name,
+        defaults={
+            "display_name": model_name,
+        },
+    )
+    return llm_model
+
+
+def _normalize_usage_type(requested_type: Optional[str]) -> str:
+    """
+    Ensure the usage type matches one of the allowed choices.
+    Falls back to the first defined usage type.
+    """
+    allowed_types = {choice[0] for choice in LLMUsage.USAGE_TYPES}
+    if requested_type in allowed_types:
+        return requested_type
+    return LLMUsage.USAGE_TYPES[0][0]
 
 
 def query_openai(
     query: str,
     model: str = "gpt-3.5-turbo",
-    usage_type: str = "custom",
+    usage_type: Optional[str] = None,
 ) -> Optional[str]:
     """
     Query OpenAI API with usage tracking.
@@ -30,6 +59,8 @@ def query_openai(
     )
 
     start_time = time.time()
+    llm_model = _get_llm_model(model)
+    normalized_usage_type = _normalize_usage_type(usage_type)
     usage_record = None
 
     try:
@@ -54,7 +85,8 @@ def query_openai(
 
         # Create usage record if profile is provided
         usage_record = LLMUsage.objects.create(
-            usage_type=usage_type,
+            model=llm_model,
+            usage_type=normalized_usage_type,
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
             total_tokens=total_tokens,
@@ -92,5 +124,7 @@ def format_message(instructions: str, raw_message: str) -> str:
         The formatted message
     """
     return query_openai(
-        f"Format the following message using the following instructions: {instructions}\n\n{raw_message}"
+        f"Format the following message using the following instructions: {instructions}\n\n{raw_message}",
+        model="gpt-3.5-turbo",
+        usage_type="Message Formatting",
     )
