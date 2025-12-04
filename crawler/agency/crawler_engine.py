@@ -313,21 +313,23 @@ class CrawlerEngine:
         for key, attribute in meta.items():
             for attempt in range(max_retries):
                 try:
-                    attribute = (
-                        attribute.copy()
-                    )  # Prevent mutation of original attribute
-                    tag = attribute.pop("tag")
+                    attribute_copy = attribute.copy()  # Prevent mutation of original attribute
+                    tag = attribute_copy.get("tag")
+                    if tag is None:
+                        raise KeyError(f"Missing 'tag' key in meta structure for field '{key}'")
+                    # Remove 'tag' from attributes dict before using it for element search
+                    attrs_for_find = {k: v for k, v in attribute_copy.items() if k != "tag"}
 
                     if tag == "value":
-                        article[key] = attribute.get("value", "")
+                        article[key] = attribute_copy.get("value", "")
                         break
                     elif tag == "code":
                         self.execute_code(
-                            attribute.get("code"), article, key, link, doc
+                            attribute_copy.get("code"), article, key, link, doc
                         )
                         break
 
-                    element = doc.find(tag, attribute)
+                    element = doc.find(tag, attrs_for_find)
                     if not element:
                         if attempt < max_retries - 1:
                             self.logging(
@@ -339,11 +341,11 @@ class CrawlerEngine:
                             doc = BeautifulSoup(self.driver.page_source, "html.parser")
                             continue
                         else:
-                            self.log_missing_element(tag, attribute, link)
+                            self.log_missing_element(tag, attrs_for_find, link)
                             article[key] = ""
                             break
 
-                    code = attribute.get("code")
+                    code = attribute_copy.get("code")
                     if code:
                         self.execute_code(code, article, key, link, doc)
                     else:
