@@ -428,19 +428,21 @@ def monitor_page_reports():
 
         if len(recent_reports) == warning_threshold:
             all_zero = all(report.new_links == 0 for report in recent_reports)
-            if all_zero and page.telegram_channel:
-                warning_message = (
-                    f"⚠️ Warning: Page '{page.name or page.url}' has had zero new links "
-                    f"for {warning_threshold} consecutive crawls. Please check the crawling configuration.\n\n"
-                    f"Last {warning_threshold} crawl results:\n"
+            if not(all_zero and page.telegram_channel):
+                continue
+
+            warning_message = (
+                f"⚠️ Warning: Page '{page.name or page.url}' has had zero new links "
+                f"for {warning_threshold} consecutive crawls. Please check the crawling configuration.\n\n"
+                f"Last {warning_threshold} crawl results:\n"
+            )
+
+            # Add details of each report
+            for i, report in enumerate(recent_reports, 1):
+                warning_message += (
+                    f"{i}. Crawl at {report.created_at.strftime('%Y-%m-%d %H:%M:%S')} - "
+                    f"Fetched: {report.fetched_links}, New: {report.new_links}\n"
                 )
 
-                # Add details of each report
-                for i, report in enumerate(recent_reports, 1):
-                    warning_message += (
-                        f"{i}. Crawl at {report.created_at.strftime('%Y-%m-%d %H:%M:%S')} - "
-                        f"Fetched: {report.fetched_links}, New: {report.new_links}\n"
-                    )
-
-                # Send warning using the existing send_log_to_telegram task
-                send_log_to_telegram.delay(warning_message)
+            # Send warning using the existing send_log_to_telegram task
+            send_log_to_telegram.delay(warning_message)
