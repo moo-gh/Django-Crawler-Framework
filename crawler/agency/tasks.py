@@ -199,13 +199,13 @@ def find_page(pages, data, key):
 # get info from data (gin)
 def gin(key: str, data: dict):
     """Get info from data with improved error handling and default values."""
-    if key in data:
-        value = data[key]
-        if value is None or value == "":
-            return "Unknown " + key
-        # remove extra spaces and new lines
-        return str(value).strip().replace("\n", "")
-    return "Unknown " + key
+    if key not in data:
+        return "Unknown " + key
+    value = data[key]
+    if value is None or value == "":
+        return "Unknown " + key
+    # remove extra spaces and new lines
+    return str(value).strip().replace("\n", "")
 
 
 # Don't remove this, it's used dynamically in
