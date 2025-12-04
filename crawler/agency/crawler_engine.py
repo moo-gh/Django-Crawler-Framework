@@ -241,7 +241,10 @@ class CrawlerEngine:
                 exec(self.page.structure.news_links_code)  # pylint: disable=exec-used
             except TimeoutException as e:
                 error_trace = traceback.format_exc()
-                self.logging(f"Timeout while executing code: {error_trace} \n {self.page.structure.news_links_code}", "warning")
+                self.logging(
+                    f"Timeout while executing code: {error_trace} \n {self.page.structure.news_links_code}",
+                    "warning",
+                )
                 return []
             except Exception as e:
                 error_trace = traceback.format_exc()
@@ -313,12 +316,18 @@ class CrawlerEngine:
         for key, attribute in meta.items():
             for attempt in range(max_retries):
                 try:
-                    attribute_copy = attribute.copy()  # Prevent mutation of original attribute
+                    attribute_copy = (
+                        attribute.copy()
+                    )  # Prevent mutation of original attribute
                     tag = attribute_copy.get("tag")
                     if tag is None:
-                        raise KeyError(f"Missing 'tag' key in meta structure for field '{key}'")
+                        raise KeyError(
+                            f"Missing 'tag' key in meta structure for field '{key}'"
+                        )
                     # Remove 'tag' from attributes dict before using it for element search
-                    attrs_for_find = {k: v for k, v in attribute_copy.items() if k != "tag"}
+                    attrs_for_find = {
+                        k: v for k, v in attribute_copy.items() if k != "tag"
+                    }
 
                     if tag == "value":
                         article[key] = attribute_copy.get("value", "")

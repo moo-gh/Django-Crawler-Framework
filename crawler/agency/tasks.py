@@ -428,7 +428,7 @@ def monitor_page_reports():
 
         if len(recent_reports) == warning_threshold:
             all_zero = all(report.new_links == 0 for report in recent_reports)
-            if not(all_zero and page.telegram_channel):
+            if not (all_zero and page.telegram_channel):
                 continue
 
             warning_message = (

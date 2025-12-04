@@ -77,3 +77,19 @@ def query_openai(
     except Exception as e:
         print(f"OpenAI API error: {str(e)}")
         return None
+
+
+def format_message(instructions: str, raw_message: str) -> str:
+    """
+    Format a raw message using AI instructions.
+
+    Args:
+        instructions: The instructions for the AI to follow
+        raw_message: The raw message to format
+
+    Returns:
+        The formatted message
+    """
+    return query_openai(
+        f"Format the following message using the following instructions: {instructions}\n\n{raw_message}"
+    )
