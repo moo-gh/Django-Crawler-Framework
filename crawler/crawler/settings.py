@@ -244,3 +244,7 @@ PROXY_HOST = env("PROXY_HOST", default=None)
 PROXY_PORT = env("PROXY_PORT", default=None)
 PROXY_USER = env("PROXY_USER", default=None)
 PROXY_PASS = env("PROXY_PASS", default=None)
+
+
+OPENAI_API_KEY = env("OPENAI_API_KEY", default=None)
+OPENAI_ORG_ID = env("OPENAI_ORG_ID", default=None)

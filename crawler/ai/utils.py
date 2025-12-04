@@ -3,6 +3,7 @@ import time
 from typing import Optional
 
 from openai import OpenAI
+from django.conf import settings
 
 from ai.models import LLMUsage
 
@@ -24,8 +25,8 @@ def query_openai(
         The response content or None if failed
     """
     client = OpenAI(
-        api_key=os.environ.get("OPENAI_API_KEY"),
-        organization=os.environ.get("OPENAI_ORG_ID"),
+        api_key=settings.OPENAI_API_KEY,
+        organization=settings.OPENAI_ORG_ID,
     )
 
     start_time = time.time()
