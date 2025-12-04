@@ -362,7 +362,7 @@ def redis_exporter():
                         "empty message",
                         page,
                         data["link"],
-                        "warning",
+                        "debug",
                     )
                     continue
 
