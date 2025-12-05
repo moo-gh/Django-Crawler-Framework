@@ -138,3 +138,7 @@ class LLMUsage(BaseModel):
             self.total_tokens = self.prompt_tokens + self.completion_tokens
 
         super().save(*args, **kwargs)
+
+
+class Formatter(BaseModel):
+    instructions = models.TextField()

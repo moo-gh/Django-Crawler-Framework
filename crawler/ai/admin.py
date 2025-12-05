@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from reusable.admins import ReadOnlyAdminDateFieldsMIXIN
-from ai.models import LLMModel, LLMUsage
+from ai.models import LLMModel, LLMUsage, Formatter
 
 
 @admin.register(LLMModel)
@@ -31,3 +31,8 @@ class LLMUsageAdmin(ReadOnlyAdminDateFieldsMIXIN):
     )
     list_filter = ("model", "usage_type")
     search_fields = ("model", "usage_type")
+
+
+@admin.register(Formatter)
+class FormatterAdmin(ReadOnlyAdminDateFieldsMIXIN):
+    list_display = ("pk", "created_at", "updated_at")
