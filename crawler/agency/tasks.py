@@ -250,6 +250,7 @@ def send_telegram_message_with_retry(
     chat_id: str,
     message: str,
     max_retries: int = TELEGRAM_MAX_RETRIES,
+    formatter: Optional[models.Formatter] = None,
 ) -> bool:
     """
     Send a Telegram message with proper rate limiting and retry logic.
@@ -259,10 +260,13 @@ def send_telegram_message_with_retry(
         chat_id: Telegram chat/channel ID
         message: Message text to send
         max_retries: Maximum number of retry attempts
+        formatter: Formatter instance
 
     Returns:
         bool: True if message was sent successfully, False otherwise
     """
+    if formatter:
+        message = formatter.format(message)
     for attempt in range(max_retries + 1):
         try:
             bot.send_message(chat_id=chat_id, text=message)
