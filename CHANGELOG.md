@@ -1,3 +1,12 @@
+# [1.63.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.62.0...v1.63.0) (2025-12-05)
+
+
+### Features
+
+* **crawler:** add Formatter model with instructions field ([d9e06a7](https://github.com/moo-gh/Django-Crawler-Framework/commit/d9e06a7b744b21bd4b86f56dcda93f96fc4c7298))
+
+
+
 # [1.62.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.61.1...v1.62.0) (2025-11-01)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * add crawl action buttons and custom handling in PageAdmin for improved page crawling functionality ([4fbabc8](https://github.com/moo-gh/Django-Crawler-Framework/commit/4fbabc8a8e97031c2e4a4864e301106e42eabd4a))
-
-
-
-# [1.59.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.58.0...v1.59.0) (2025-10-16)
-
-
-### Features
-
-* add get_page_names method to OffTimeAdmin ([6ada7c4](https://github.com/moo-gh/Django-Crawler-Framework/commit/6ada7c4199a475a8b0fbb74db5173f7bb7dfcae5))
 
 
 
