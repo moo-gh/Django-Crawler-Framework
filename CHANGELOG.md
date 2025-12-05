@@ -1,3 +1,12 @@
+# [1.64.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.63.0...v1.64.0) (2025-12-05)
+
+
+### Features
+
+* **crawler:** add optional formatter parameter to send_telegram_message_with_retry ([c1f0f8b](https://github.com/moo-gh/Django-Crawler-Framework/commit/c1f0f8b08501f51f2957711d76b7475d37addcea))
+
+
+
 # [1.63.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.62.0...v1.63.0) (2025-12-05)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * add last_crawl_new_count field to Page model and corresponding migration ([a900ed6](https://github.com/moo-gh/Django-Crawler-Framework/commit/a900ed628e3ed4aec89d2e118651c709b9d0f63b))
-
-
-
-# [1.60.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.59.0...v1.60.0) (2025-10-21)
-
-
-### Features
-
-* add crawl action buttons and custom handling in PageAdmin for improved page crawling functionality ([4fbabc8](https://github.com/moo-gh/Django-Crawler-Framework/commit/4fbabc8a8e97031c2e4a4864e301106e42eabd4a))
 
 
 
