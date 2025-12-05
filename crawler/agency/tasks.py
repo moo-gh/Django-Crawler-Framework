@@ -367,6 +367,7 @@ def redis_exporter():
                     continue
 
                 # Send message with proper rate limiting
+                # todo: use formatter to send message
                 success = send_telegram_message_with_retry(
                     bot, page.telegram_channel, message
                 )
