@@ -19,6 +19,7 @@ from . import utils, models
 from crawler.celery import crawler
 from notification import utils as not_utils
 from notification import models as not_models
+from ai import models as ai_models
 from reusable.other import only_one_concurrency
 
 
@@ -250,7 +251,7 @@ def send_telegram_message_with_retry(
     chat_id: str,
     message: str,
     max_retries: int = TELEGRAM_MAX_RETRIES,
-    formatter: Optional[models.Formatter] = None,
+    formatter: Optional[ai_models.Formatter] = None,
 ) -> bool:
     """
     Send a Telegram message with proper rate limiting and retry logic.
