@@ -108,6 +108,7 @@ class Page(BaseModel):
         "notification.FilteringTag", related_name="pages", blank=True
     )
     off_times = models.ManyToManyField("OffTime", related_name="pages", blank=True)
+    formatter = models.ForeignKey("ai.formatter", related_name="pages", null=True, blank=True)
 
     def __str__(self):
         return f"({self.pk} - {self.name})"
