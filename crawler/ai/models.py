@@ -154,7 +154,6 @@ class Formatter(BaseModel):
         Returns:
             The formatted message, or the original message if formatting fails
         """
-        
 
         formatted_message = utils.format_message(self.instructions, message)
         if formatted_message is None:
