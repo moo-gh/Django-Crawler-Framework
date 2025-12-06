@@ -1,6 +1,7 @@
 from django.db import models
 from decimal import Decimal
 
+from . import utils
 from reusable.models import BaseModel
 
 
@@ -142,3 +143,20 @@ class LLMUsage(BaseModel):
 
 class Formatter(BaseModel):
     instructions = models.TextField()
+
+    def format(self, message: str) -> str:
+        """
+        Format a message using the formatter's instructions.
+
+        Args:
+            message: The raw message to format
+
+        Returns:
+            The formatted message, or the original message if formatting fails
+        """
+        
+
+        formatted_message = utils.format_message(self.instructions, message)
+        if formatted_message is None:
+            return message
+        return formatted_message
