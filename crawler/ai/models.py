@@ -1,7 +1,6 @@
 from django.db import models
 from decimal import Decimal
 
-from . import utils
 from reusable.models import BaseModel
 
 
@@ -154,8 +153,9 @@ class Formatter(BaseModel):
         Returns:
             The formatted message, or the original message if formatting fails
         """
+        from ai.utils import format_message
 
-        formatted_message = utils.format_message(self.instructions, message)
+        formatted_message = format_message(self.instructions, message)
         if formatted_message is None:
             return message
         return formatted_message
