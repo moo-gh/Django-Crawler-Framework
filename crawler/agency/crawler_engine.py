@@ -119,7 +119,8 @@ class CrawlerEngine:
         Lands on the page with retry mechanism.
         """
         max_retries = 3
-        retry_delay = 2  # seconds
+        initial_delay = 60 # seconds
+        retry_delay = initial_delay
 
         for attempt in range(max_retries):
             try:
@@ -174,18 +175,22 @@ class CrawlerEngine:
                 #     return False
 
             except TimeoutException as error:
-                if attempt < max_retries - 1:
-                    self.logging(
-                        f"Timeout while loading {self.page.url} on attempt {attempt + 1}, retrying in {retry_delay} seconds...",
-                        "warning",
-                    )
-                    time.sleep(retry_delay)
-                    retry_delay *= 2
-                else:
-                    error = traceback.format_exc()
-                    error = f"Timeout while loading {self.page.url} after {max_retries} attempts: {error}"
-                    self.logging(error, "error")
-                    return False
+                error = f"Timeout while loading {self.page.url}: {traceback.format_exc()}"
+                self.logging(error, "warning")
+                return False
+
+                # if attempt < max_retries - 1:
+                #     self.logging(
+                #         f"Timeout while loading {self.page.url} on attempt {attempt + 1}, retrying in {retry_delay} seconds...",
+                #         "warning",
+                #     )
+                #     time.sleep(retry_delay)
+                #     retry_delay += initial_delay
+                # else:
+                #     error = traceback.format_exc()
+                #     error = f"Timeout while loading {self.page.url} after {max_retries} attempts: {error}"
+                #     self.logging(error, "error")
+                #     return False
         return True
 
     def taking_picture(self):
