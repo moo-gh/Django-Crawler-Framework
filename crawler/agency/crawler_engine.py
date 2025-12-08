@@ -119,7 +119,7 @@ class CrawlerEngine:
         Lands on the page with retry mechanism.
         """
         max_retries = 3
-        initial_delay = 60 # seconds
+        initial_delay = 60  # seconds
         retry_delay = initial_delay
 
         for attempt in range(max_retries):
@@ -175,7 +175,9 @@ class CrawlerEngine:
                 #     return False
 
             except TimeoutException as error:
-                error = f"Timeout while loading {self.page.url}: {traceback.format_exc()}"
+                error = (
+                    f"Timeout while loading {self.page.url}: {traceback.format_exc()}"
+                )
                 self.logging(error, "warning")
                 return False
 
