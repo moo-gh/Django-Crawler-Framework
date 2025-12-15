@@ -157,7 +157,7 @@ class PageAdmin(ReadOnlyAdminDateFieldsMIXIN):
 
     form = PageAdminForm
     list_filter = ("lock", "status", "agency")
-    list_editable = ("load_sleep", "links_sleep", "status", "crawl_interval")
+    list_editable = ("load_sleep", "links_sleep", "status", "use_proxy", "crawl_interval")
     readonly_fields = (
         "last_crawl",
         "created_at",
@@ -176,8 +176,8 @@ class PageAdmin(ReadOnlyAdminDateFieldsMIXIN):
         "get_last_crawl_count",
         "get_last_crawl_new_count",
         "status",
-        "today_crawl_count",
         "use_proxy",
+        "today_crawl_count",
         "lock",
         "fetch_content",
         "take_picture",
