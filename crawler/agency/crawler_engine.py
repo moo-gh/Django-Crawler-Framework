@@ -160,20 +160,6 @@ class CrawlerEngine:
                 # probably failure to load the page
                 return False
 
-                # if attempt < max_retries - 1:
-                #     self.logging(
-                #         f"Page load attempt {attempt + 1} failed for {self.page.url}, retrying in {retry_delay} seconds..."
-                #     )
-                #     time.sleep(retry_delay)
-                #     retry_delay *= 2  # Exponential backoff
-                # else:
-                #     error = (
-                #         f"Failed to load {self.page.url} after {max_retries} attempts"
-                #     )
-                #     logger.error(error)
-                #     self.logging(error, "error")
-                #     return False
-
             except TimeoutException as error:
                 error = (
                     f"Timeout while loading {self.page.url}: {traceback.format_exc()}"
@@ -181,18 +167,6 @@ class CrawlerEngine:
                 self.logging(error, "warning")
                 return False
 
-                # if attempt < max_retries - 1:
-                #     self.logging(
-                #         f"Timeout while loading {self.page.url} on attempt {attempt + 1}, retrying in {retry_delay} seconds...",
-                #         "warning",
-                #     )
-                #     time.sleep(retry_delay)
-                #     retry_delay += initial_delay
-                # else:
-                #     error = traceback.format_exc()
-                #     error = f"Timeout while loading {self.page.url} after {max_retries} attempts: {error}"
-                #     self.logging(error, "error")
-                #     return False
         return True
 
     def taking_picture(self):
