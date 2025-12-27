@@ -64,8 +64,7 @@ def send_log_to_telegram(message):
         return
 
     # Use the same rate limiting approach for log messages
-    bot = telegram.Bot(token=bot_model.telegram_token)
-    success = send_telegram_message_with_retry(bot, account.chat_id, message)
+    success = send_telegram_message_with_retry(bot_model.telegram_token, account.chat_id, message)
     if not success:
         logger.error("Failed to send log message to Telegram after retries")
 
@@ -247,8 +246,13 @@ def get_page_ignoring_tokens(page: models.Page) -> list["str"]:
     )
 
 
+async def _send_telegram_message(token: str, chat_id: str, message: str):
+    async with telegram.Bot(token=token) as bot:
+        await bot.send_message(chat_id=chat_id, text=message)
+
+
 def send_telegram_message_with_retry(
-    bot: telegram.Bot,
+    bot_token: str,
     chat_id: str,
     message: str,
     max_retries: int = TELEGRAM_MAX_RETRIES,
@@ -258,7 +262,7 @@ def send_telegram_message_with_retry(
     Send a Telegram message with proper rate limiting and retry logic.
 
     Args:
-        bot: Telegram bot instance
+        bot_token: Telegram bot token
         chat_id: Telegram chat/channel ID
         message: Message text to send
         max_retries: Maximum number of retry attempts
@@ -271,7 +275,7 @@ def send_telegram_message_with_retry(
         message = formatter.format(message)
     for attempt in range(max_retries + 1):
         try:
-            asyncio.run(bot.send_message(chat_id=chat_id, text=message))
+            asyncio.run(_send_telegram_message(bot_token, chat_id, message))
             logger.debug(
                 f"Message sent successfully to {chat_id} on attempt {attempt + 1}"
             )
@@ -330,7 +334,6 @@ def redis_exporter():
 
     ignoring_tokens = {}
 
-    bot = telegram.Bot(token=settings.BOT_API_KEY)
     pages = models.Page.objects.all()
     for key in redis_news.scan_iter("links_*"):
         data = redis_news.get(key)
@@ -375,7 +378,7 @@ def redis_exporter():
                 # Send message with proper rate limiting
                 # todo: use formatter to send message
                 success = send_telegram_message_with_retry(
-                    bot, page.telegram_channel, message
+                    settings.BOT_API_KEY, page.telegram_channel, message
                 )
                 if not success:
                     register_log(
