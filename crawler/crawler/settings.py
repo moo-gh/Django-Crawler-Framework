@@ -225,7 +225,7 @@ if EMAIL_HOST_USER and ADMIN_EMAIL_LOG:
                     "log_celery_error",
                 ],
                 "level": f"{LOG_LEVEL}",
-                "propagate": False,  # if True, will propagate to root logger
+                "propagate": True,  # if True, will propagate to root logger
             },
         },
     }
