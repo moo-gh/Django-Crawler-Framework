@@ -385,6 +385,7 @@ def redis_exporter():
                         "error",
                     )
                     continue
+                logger.info("Sent message to Telegram: %s, channel: %s", message, page.telegram_channel)
 
                 # Add a small delay between messages to be respectful to Telegram's API
                 time.sleep(TELEGRAM_BASE_DELAY)
