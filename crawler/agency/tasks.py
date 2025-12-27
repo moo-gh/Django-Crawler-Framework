@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 import re
 import json
+import asyncio
 import time
 import redis
 import socket
@@ -270,7 +271,7 @@ def send_telegram_message_with_retry(
         message = formatter.format(message)
     for attempt in range(max_retries + 1):
         try:
-            bot.send_message(chat_id=chat_id, text=message)
+            asyncio.run(bot.send_message(chat_id=chat_id, text=message))
             logger.debug(
                 f"Message sent successfully to {chat_id} on attempt {attempt + 1}"
             )
