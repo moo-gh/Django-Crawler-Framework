@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-PYTHON_VERSION=3.11
+PYTHON_VERSION=3.12
 
 .PHONY: format
 format: format-python
