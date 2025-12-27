@@ -1,11 +1,13 @@
+import logging
 from os import path
 from typing import Optional, List
 
-from django.conf import settings
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
+
+logger = logging.getLogger(__name__)
 
 CODE = """
 {0}
@@ -87,7 +89,7 @@ def get_browser_options(use_proxy: bool = False) -> FirefoxOptions:
     options.add_argument("--no-sandbox")
 
     if use_proxy:
-        print("Using proxy")
+        logger.info("Using proxy")
 
         # Establishing the SOCKS proxy
         # first you should create a socks connection in the host
