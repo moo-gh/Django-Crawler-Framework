@@ -13,7 +13,7 @@ ipython
 pillow
 psycopg2
 python-dateutil
-python-telegram-bot
+python-telegram-bot>=20,<22
 redis
 requests>=2.28.1
 selenium==4.21.0 
