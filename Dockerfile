@@ -1,6 +1,6 @@
 # Use multi-stage builds
 # Stage 1: Build stage
-FROM python:3.11-alpine as builder
+FROM python:3.12-alpine as builder
 WORKDIR /app
 COPY requirements.txt .
 
@@ -12,11 +12,11 @@ RUN apk add --no-cache --virtual .build-deps \
     && apk del .build-deps
 
 # Stage 2: Run stage
-FROM python:3.11-alpine
+FROM python:3.12-alpine
 WORKDIR /app
 
 # Copy installed python packages from builder
-COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Install runtime dependencies
