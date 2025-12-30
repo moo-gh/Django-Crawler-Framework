@@ -125,10 +125,8 @@ class CrawlerEngine:
         Lands on the page with retry mechanism.
         """
         max_retries = 3
-        initial_delay = 60  # seconds
-        retry_delay = initial_delay
 
-        for attempt in range(max_retries):
+        for _ in range(max_retries):
             try:
                 self.driver.get(self.page.url)
                 self.remove_some_images(self.driver)
