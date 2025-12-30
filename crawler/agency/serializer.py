@@ -58,6 +58,9 @@ class ReportListSerializer(serializers.ModelSerializer):
     duration = serializers.SerializerMethodField("is_named_bar")
 
     def is_named_bar(self, obj):
+        """
+        Calculates the duration of the crawl report in seconds.
+        """
         seconds = round((obj.updated_at - obj.created_at).total_seconds())
         return f"{seconds} sec"
 
