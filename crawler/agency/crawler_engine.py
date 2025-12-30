@@ -70,6 +70,9 @@ class CrawlerEngine:
         return driver
 
     def initialize_driver(self, use_proxy: bool) -> bool:
+        """
+        Initializes the driver for the crawler engine.
+        """
         try:
             self.driver = webdriver.Remote(
                 "http://crawler-selenium-hub:4444",
@@ -86,6 +89,9 @@ class CrawlerEngine:
         return True
 
     def after_initialize_driver(self, page_id):
+        """
+        After initializing the driver, we set the page load timeout and the page lock.
+        """
         self.page = models.Page.objects.get(id=page_id)
         self.driver.set_page_load_timeout(self.page.agency.load_timeout)
         self.page.lock = True
