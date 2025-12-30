@@ -11,6 +11,10 @@ logger = get_task_logger(__name__)
 
 @crawler.task(name="count_daily_news")
 def count_daily_news():
+    """
+    Counts the number of new links crawled in the last 24 hours and sends a notification
+    via Telegram using the configured bot and account.
+    """
     yesterday = timezone.localtime() - timezone.timedelta(days=1)
     new_links = (
         age_models.Report.objects.filter(created_at__gt=yesterday).aggregate(
