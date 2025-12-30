@@ -1,3 +1,12 @@
+## [1.64.1](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.64.0...v1.64.1) (2025-12-27)
+
+
+### Bug Fixes
+
+* **crawler:** refactor Telegram message sending to use bot token directly and implement async message sending ([afb260c](https://github.com/moo-gh/Django-Crawler-Framework/commit/afb260c03cb4734e1342eb1fd350544d0c959289))
+
+
+
 # [1.64.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.63.0...v1.64.0) (2025-12-05)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * update schedule for monitor-page-reports task to run every 11 hours ([f895bba](https://github.com/moo-gh/Django-Crawler-Framework/commit/f895bba9285e9b142cb0c89fc6842e2149c57e40))
-
-
-
-# [1.61.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.60.0...v1.61.0) (2025-10-29)
-
-
-### Features
-
-* add last_crawl_new_count field to Page model and corresponding migration ([a900ed6](https://github.com/moo-gh/Django-Crawler-Framework/commit/a900ed628e3ed4aec89d2e118651c709b9d0f63b))
 
 
 
