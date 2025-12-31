@@ -174,6 +174,10 @@ class CrawlerEngine:
         return True
 
     def taking_picture(self):
+        """Take a screenshot of the current page if take_picture is enabled.
+
+        The screenshot is saved to the static root with the report ID as the filename.
+        """
         if not self.page.take_picture:
             return
         # in debug mode static_root is none
@@ -183,6 +187,11 @@ class CrawlerEngine:
         self.report.save()
 
     def get_elements(self):
+        """Find elements from the page source using BeautifulSoup.
+
+        Returns:
+            list: A list of BeautifulSoup elements matching the news links structure.
+        """
         doc = BeautifulSoup(self.driver.page_source, "html.parser")
         attribute = self.page.structure.news_links_structure
         tag = attribute.pop("tag")
