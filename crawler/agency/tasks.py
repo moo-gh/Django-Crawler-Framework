@@ -40,12 +40,18 @@ redis_news = redis.StrictRedis(host="crawler-redis", port=6379, db=0)
 
 @crawler.task(name="remove_old_reports")
 def remove_old_reports():
+    """
+    Deletes report records that are older than 7 days.
+    """
     before_time = timezone.localtime() - timezone.timedelta(days=7)
     models.Report.objects.filter(created_at__lte=before_time).delete()[0]
 
 
 @crawler.task(name="remove_old_logs")
 def remove_old_logs():
+    """
+    Deletes log entries and DB log entries that are older than 7 days.
+    """
     before_time = timezone.localtime() - timezone.timedelta(days=7)
     models.Log.objects.filter(created_at__lte=before_time).delete()
     models.DBLogEntry.objects.filter(time__lte=before_time).delete()
@@ -53,11 +59,21 @@ def remove_old_logs():
 
 @crawler.task(name="reset_page_locks")
 def reset_page_locks():
+    """
+    Resets the lock status of all Page objects to False.
+    Useful for recovering from tasks that might have crashed while holding a lock.
+    """
     models.Page.objects.update(lock=False)
 
 
 @crawler.task(name="send_log_to_telegram")
 def send_log_to_telegram(message):
+    """
+    Sends a log message to a Telegram account using a configured bot.
+
+    Args:
+        message (str): The log message to be sent.
+    """
     bot_model = not_models.TelegramBot.objects.first()
     account = not_models.TelegramAccount.objects.first()
     if not (bot_model and account):
