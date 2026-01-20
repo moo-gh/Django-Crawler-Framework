@@ -6,7 +6,7 @@ from reusable.admins import ReadOnlyAdminDateFieldsMIXIN
 
 @admin.register(models.TelegramBot)
 class TelegramBotAdmin(ReadOnlyAdminDateFieldsMIXIN):
-    list_display = ("pk", "name")
+    list_display = ("pk", "name", "created_at", "updated_at")
 
 
 @admin.register(models.TelegramAccount)
