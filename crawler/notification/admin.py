@@ -26,7 +26,7 @@ class FilteringTagAdmin(ReadOnlyAdminDateFieldsMIXIN):
 
 @admin.register(models.FilteringToken)
 class FilteringTokenAdmin(ReadOnlyAdminDateFieldsMIXIN):
-    list_display = ("pk", "token", "tag", "created_at")
+    list_display = ("pk", "token", "tag", "created_at", "updated_at")
     search_fields = ("token",)
     list_filter = ("tag",)
     list_per_page = 20
