@@ -21,7 +21,7 @@ class MessageTemplateAdmin(ReadOnlyAdminDateFieldsMIXIN):
 
 @admin.register(models.FilteringTag)
 class FilteringTagAdmin(ReadOnlyAdminDateFieldsMIXIN):
-    list_display = ("pk", "name")
+    list_display = ("pk", "name", "created_at", "updated_at")
 
 
 @admin.register(models.FilteringToken)
