@@ -46,6 +46,7 @@ class ReportAdmin(ReadOnlyAdminDateFieldsMIXIN):
         "new_links",
         "image_tag",
         "started_at",
+        "created_at",
     )
     readonly_fields = (
         "log",
