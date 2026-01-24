@@ -1,6 +1,7 @@
 import logging
 import redis
-
+from datetime import timedelta
+from django.db.models import Sum
 from django.utils import timezone
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -286,6 +287,47 @@ def crawl_agency_reset_memory_and_crawl(_request, _version, agency_id):
         {
             "number_of_links_deleted": counter_links,
             "number_of_news_deleted": counter_news,
+        }
+    )
+
+
+@api_view(["GET"])
+def linkedin_stats(_request, _version):
+    now = timezone.now()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    week_start = now - timedelta(days=7)
+    month_start = now - timedelta(days=30)
+
+    base_qs = Report.objects.filter(page__agency__name__icontains="linkedin")
+
+    today_count = (
+        base_qs.filter(created_at__gte=today_start).aggregate(Sum("new_links"))[
+            "new_links__sum"
+        ]
+        or 0
+    )
+    week_count = (
+        base_qs.filter(created_at__gte=week_start).aggregate(Sum("new_links"))[
+            "new_links__sum"
+        ]
+        or 0
+    )
+    month_count = (
+        base_qs.filter(created_at__gte=month_start).aggregate(Sum("new_links"))[
+            "new_links__sum"
+        ]
+        or 0
+    )
+
+    return Response(
+        {
+            "status": "200",
+            "message": "LinkedIn statistics retrieved successfully",
+            "data": {
+                "today": today_count,
+                "last_week": week_count,
+                "last_month": month_count,
+            },
         }
     )
 

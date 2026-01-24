@@ -15,6 +15,7 @@ urlpatterns = [
     path("test_error/", views.TestErrorView.as_view()),
     path("crawl/page/<int:page_id>/", views.crawl_page),
     path("fetch_content/", views.FetchContent.as_view()),
+    path("linkedin/stats/", views.linkedin_stats),
     path("crawl/memory/reset/", views.crawl_memory_reset),
     path("crawl/agency/<int:agency_id>/", views.crawl_agency),
     path("agency/<int:agency_id>/pages/", views.agency_pages),
