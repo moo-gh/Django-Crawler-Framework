@@ -1,3 +1,12 @@
+# [1.65.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.64.1...v1.65.0) (2026-01-24)
+
+
+### Features
+
+* **crawler:** add LinkedIn statistics endpoint ([34b01a0](https://github.com/moo-gh/Django-Crawler-Framework/commit/34b01a01606bfe1c4f16a306673321490d6d633a))
+
+
+
 ## [1.64.1](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.64.0...v1.64.1) (2025-12-27)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **ai:** add AI module with LLM model and usage tracking ([d49ef02](https://github.com/moo-gh/Django-Crawler-Framework/commit/d49ef02b9e87c0116ad41beef22d6a8288fd347d))
-
-
-
-## [1.61.1](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.61.0...v1.61.1) (2025-10-31)
-
-
-### Bug Fixes
-
-* update schedule for monitor-page-reports task to run every 11 hours ([f895bba](https://github.com/moo-gh/Django-Crawler-Framework/commit/f895bba9285e9b142cb0c89fc6842e2149c57e40))
 
 
 
