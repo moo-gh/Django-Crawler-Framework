@@ -80,7 +80,9 @@ def send_log_to_telegram(message):
         return
 
     # Use the same rate limiting approach for log messages
-    success = send_telegram_message_with_retry(bot_model.telegram_token, account.chat_id, message)
+    success = send_telegram_message_with_retry(
+        bot_model.telegram_token, account.chat_id, message
+    )
     if not success:
         logger.error("Failed to send log message to Telegram after retries")
 
@@ -405,7 +407,11 @@ def redis_exporter():
                         "error",
                     )
                     continue
-                logger.info("Sent message to Telegram: %s, channel: %s", message, page.telegram_channel)
+                logger.info(
+                    "Sent message to Telegram: %s, channel: %s",
+                    message,
+                    page.telegram_channel,
+                )
 
                 # Add a small delay between messages to be respectful to Telegram's API
                 time.sleep(TELEGRAM_BASE_DELAY)

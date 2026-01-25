@@ -1,7 +1,7 @@
 import requests
 
 
-def telegram_bot_send_text(token: str, chat_id: str, message: str)->dict:
+def telegram_bot_send_text(token: str, chat_id: str, message: str) -> dict:
     send_text = (
         "https://api.telegram.org/bot"
         + token
