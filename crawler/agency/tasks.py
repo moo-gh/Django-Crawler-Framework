@@ -438,6 +438,36 @@ def test_error():
     raise Exception("hi")
 
 
+def check_page_reports(page, warning_threshold, time_threshold):
+    """
+    Check reports for a specific page and send a warning if there are consecutive zero counts.
+    """
+    recent_reports = models.Report.objects.filter(
+        page=page, created_at__gte=time_threshold
+    ).order_by("-created_at")[:warning_threshold]
+
+    if len(recent_reports) == warning_threshold:
+        all_zero = all(report.new_links == 0 for report in recent_reports)
+        if not (all_zero and page.telegram_channel):
+            return
+
+        warning_message = (
+            f"⚠️ Warning: Page '{page.name or page.url}' has had zero new links "
+            f"for {warning_threshold} consecutive crawls. Please check the crawling configuration.\n\n"
+            f"Last {warning_threshold} crawl results:\n"
+        )
+
+        # Add details of each report
+        for i, report in enumerate(recent_reports, 1):
+            warning_message += (
+                f"{i}. Crawl at {report.created_at.strftime('%Y-%m-%d %H:%M:%S')} - "
+                f"Fetched: {report.fetched_links}, New: {report.new_links}\n"
+            )
+
+        # Send warning using the existing send_log_to_telegram task
+        send_log_to_telegram.delay(warning_message)
+
+
 @crawler.task(name="monitor_page_reports")
 @only_one_concurrency(key="monitor_page_reports", timeout=TASKS_TIMEOUT)
 def monitor_page_reports():
@@ -455,27 +485,4 @@ def monitor_page_reports():
     )  # Look at reports from last 24 hours
 
     for page in models.Page.objects.filter(status=True):  # Only check active pages
-        recent_reports = models.Report.objects.filter(
-            page=page, created_at__gte=time_threshold
-        ).order_by("-created_at")[:warning_threshold]
-
-        if len(recent_reports) == warning_threshold:
-            all_zero = all(report.new_links == 0 for report in recent_reports)
-            if not (all_zero and page.telegram_channel):
-                continue
-
-            warning_message = (
-                f"⚠️ Warning: Page '{page.name or page.url}' has had zero new links "
-                f"for {warning_threshold} consecutive crawls. Please check the crawling configuration.\n\n"
-                f"Last {warning_threshold} crawl results:\n"
-            )
-
-            # Add details of each report
-            for i, report in enumerate(recent_reports, 1):
-                warning_message += (
-                    f"{i}. Crawl at {report.created_at.strftime('%Y-%m-%d %H:%M:%S')} - "
-                    f"Fetched: {report.fetched_links}, New: {report.new_links}\n"
-                )
-
-            # Send warning using the existing send_log_to_telegram task
-            send_log_to_telegram.delay(warning_message)
+        check_page_reports(page, warning_threshold, time_threshold)
