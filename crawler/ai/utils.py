@@ -1,11 +1,14 @@
-import os
 import time
+import logging
 from typing import Optional
 
 from openai import OpenAI
 from django.conf import settings
 
 from ai.models import LLMModel, LLMUsage
+
+
+logger = logging.getLogger(__name__)
 
 
 def _get_llm_model(model_name: str) -> LLMModel:
@@ -108,7 +111,7 @@ def query_openai(
         return result.choices[0].message.content
 
     except Exception as e:
-        print(f"OpenAI API error: {str(e)}")
+        logger.error(f"Error in query_openai: {e}")
         return None
 
 

@@ -32,7 +32,6 @@ class AgencyView(viewsets.ModelViewSet):
                 "message": msg["fa"]["agency"]["success_agency_created"],
                 "data": serializer.data,
             }
-            print(serializer.data["id"], serializer.data["website"])
         else:
             response_data = {
                 "status": "400",
