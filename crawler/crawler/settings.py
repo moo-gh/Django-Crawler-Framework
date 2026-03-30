@@ -119,6 +119,7 @@ REST_FRAMEWORK = {
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # Email Configs
+EMAIL_BACKEND = "reusable.email_backend.EmailBackend"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST = env("EMAIL_HOST", default="smtp-mail.outlook.com")
