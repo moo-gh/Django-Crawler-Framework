@@ -47,6 +47,10 @@ crawler.conf.beat_schedule = {
         "task": "reset_page_locks",
         "schedule": crontab(minute=0, hour="*/1"),
     },
+    "cleanup-stale-redis-links": {
+        "task": "cleanup_stale_redis_links",
+        "schedule": crontab(minute=0, hour="*/1"),
+    },
     "monitor-page-reports": {
         "task": "monitor_page_reports",
         "schedule": crontab(minute=0, hour="*/11"),

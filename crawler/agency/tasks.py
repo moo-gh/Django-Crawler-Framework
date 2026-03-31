@@ -337,6 +337,39 @@ def send_telegram_message_with_retry(
     return False
 
 
+@crawler.task(name="cleanup_stale_redis_links")
+def cleanup_stale_redis_links():
+    """
+    Hourly sweep of links_* keys for pages that no longer exist or are inactive.
+    """
+    if settings.DEBUG:
+        logger.info("cleanup_stale_redis_links is disabled in debug mode")
+        return
+
+    pages = models.Page.objects.all()
+    removed = 0
+    for key in redis_news.scan_iter("links_*"):
+        raw = redis_news.get(key)
+        if raw is None:
+            continue
+        try:
+            data = json.loads(raw.decode("utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            redis_news.delete(key)
+            removed += 1
+            continue
+
+        page_id = data.get("page_id")
+        if page_id is None or not pages.filter(pk=page_id, status=True).exists():
+            redis_news.delete(key)
+            removed += 1
+
+    if removed:
+        logger.info("cleanup_stale_redis_links removed %s stale keys", removed)
+    else:
+        logger.debug("cleanup_stale_redis_links: no stale keys found")
+
+
 @crawler.task(name="redis_exporter")
 @only_one_concurrency(key="redis_exporter", timeout=TASKS_TIMEOUT)
 def redis_exporter():
