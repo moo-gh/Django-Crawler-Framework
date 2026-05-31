@@ -344,7 +344,7 @@ def cleanup_stale_redis_links():
     """
     if settings.DEBUG:
         logger.info("cleanup_stale_redis_links is disabled in debug mode")
-        return
+        return 0
 
     pages = models.Page.objects.all()
     removed = 0
@@ -364,10 +364,8 @@ def cleanup_stale_redis_links():
             redis_news.delete(key)
             removed += 1
 
-    if removed:
-        logger.info("cleanup_stale_redis_links removed %s stale keys", removed)
-    else:
-        logger.debug("cleanup_stale_redis_links: no stale keys found")
+    logger.info("cleanup_stale_redis_links finished: %s redis keys deleted", removed)
+    return removed
 
 
 @crawler.task(name="redis_exporter")
