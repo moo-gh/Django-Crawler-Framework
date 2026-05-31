@@ -1,3 +1,12 @@
+## [1.65.1](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.65.0...v1.65.1) (2026-05-31)
+
+
+### Bug Fixes
+
+* **crawler:** implement custom email backend for Python 3.12 compatibility ([96ea3be](https://github.com/moo-gh/Django-Crawler-Framework/commit/96ea3beed99b827c5d72af0e0b7b12c0caf0e4de))
+
+
+
 # [1.65.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.64.1...v1.65.0) (2026-01-24)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **crawler:** add Formatter model with instructions field ([d9e06a7](https://github.com/moo-gh/Django-Crawler-Framework/commit/d9e06a7b744b21bd4b86f56dcda93f96fc4c7298))
-
-
-
-# [1.62.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.61.1...v1.62.0) (2025-11-01)
-
-
-### Features
-
-* **ai:** add AI module with LLM model and usage tracking ([d49ef02](https://github.com/moo-gh/Django-Crawler-Framework/commit/d49ef02b9e87c0116ad41beef22d6a8288fd347d))
 
 
 
