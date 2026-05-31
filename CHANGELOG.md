@@ -1,3 +1,12 @@
+# [1.67.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.66.0...v1.67.0) (2026-05-31)
+
+
+### Features
+
+* **crawler:** update cleanup_stale_redis_links to return number of deleted keys and improve logging ([030eb54](https://github.com/moo-gh/Django-Crawler-Framework/commit/030eb5492bbae44c576b73e6f9a777529f94a20e))
+
+
+
 # [1.66.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.65.1...v1.66.0) (2026-05-31)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **crawler:** refactor Telegram message sending to use bot token directly and implement async message sending ([afb260c](https://github.com/moo-gh/Django-Crawler-Framework/commit/afb260c03cb4734e1342eb1fd350544d0c959289))
-
-
-
-# [1.64.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.63.0...v1.64.0) (2025-12-05)
-
-
-### Features
-
-* **crawler:** add optional formatter parameter to send_telegram_message_with_retry ([c1f0f8b](https://github.com/moo-gh/Django-Crawler-Framework/commit/c1f0f8b08501f51f2957711d76b7475d37addcea))
 
 
 
