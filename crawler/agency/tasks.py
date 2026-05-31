@@ -121,8 +121,10 @@ def check_agencies():
         for i in range(task_interval_minutes)
     ]
 
-    # Get all pages with active schedules matching the current day and time range
-    schedules = models.CrawlScheduling.objects.all()
+    schedules = models.CrawlScheduling.objects.filter(
+        page__status=True,
+        page__agency__status=True,
+    ).select_related("page")
 
     for schedule in schedules:
         days = schedule.get_days()  # Split days into a list
