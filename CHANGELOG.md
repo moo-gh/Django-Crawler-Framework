@@ -1,3 +1,12 @@
+# [1.66.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.65.1...v1.66.0) (2026-05-31)
+
+
+### Features
+
+* **crawler:** add task to cleanup stale Redis links and schedule it hourly ([4b92aea](https://github.com/moo-gh/Django-Crawler-Framework/commit/4b92aeaa328b06efd054ee04122fc687d656adf1))
+
+
+
 ## [1.65.1](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.65.0...v1.65.1) (2026-05-31)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **crawler:** add optional formatter parameter to send_telegram_message_with_retry ([c1f0f8b](https://github.com/moo-gh/Django-Crawler-Framework/commit/c1f0f8b08501f51f2957711d76b7475d37addcea))
-
-
-
-# [1.63.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.62.0...v1.63.0) (2025-12-05)
-
-
-### Features
-
-* **crawler:** add Formatter model with instructions field ([d9e06a7](https://github.com/moo-gh/Django-Crawler-Framework/commit/d9e06a7b744b21bd4b86f56dcda93f96fc4c7298))
 
 
 
