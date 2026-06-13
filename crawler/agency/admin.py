@@ -1,11 +1,9 @@
 import importlib
 from typing import Optional
 from datetime import datetime
-from prettyjson import PrettyJSONWidget
 from rangefilter.filter import DateTimeRangeFilter
 
 from django import forms
-from django.conf import settings
 from django.contrib import admin
 from django.contrib import messages
 from django.utils.html import format_html
@@ -113,27 +111,16 @@ class StructureForm(forms.ModelForm):
         model = Structure
         fields = "__all__"
         widgets = {
-            "news_meta_structure": PrettyJSONWidget(),
-            "news_links_structure": PrettyJSONWidget(),
+            "news_links_structure": MonacoEditorWidget(
+                attrs={"data-wordwrap": "on", "data-language": "json"}
+            ),
+            "news_meta_structure": MonacoEditorWidget(
+                attrs={"data-wordwrap": "on", "data-language": "json"}
+            ),
             "news_links_code": MonacoEditorWidget(
                 attrs={"data-wordwrap": "on", "data-language": "python"}
             ),
         }
-
-    @property
-    def media(self):
-        # Django 5.x media merge can load Monaco's loader.js between jquery.js and
-        # jquery.init.js, which breaks django-prettyjson on this form.
-        extra = "" if settings.DEBUG else ".min"
-        prettyjson_media = forms.Media(
-            js=(
-                f"admin/js/vendor/jquery/jquery{extra}.js",
-                "admin/js/jquery.init.js",
-                "prettyjson/prettyjson.js",
-            ),
-            css={"all": ("prettyjson/prettyjson.css",)},
-        )
-        return prettyjson_media + self.fields["news_links_code"].widget.media
 
 
 @admin.register(Structure)
