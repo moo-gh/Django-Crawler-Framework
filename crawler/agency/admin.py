@@ -16,7 +16,13 @@ from django.http import HttpResponseRedirect
 from djangoeditorwidgets.widgets import MonacoEditorWidget
 
 from reusable.admins import ReadOnlyAdminDateFieldsMIXIN
-from agency.redis_utils import TRACKED_ARTICLE_FIELDS, get_page_redis_cache
+from agency.redis_utils import (
+    TRACKED_ARTICLE_FIELDS,
+    clear_agency_duplicate_links,
+    clear_page_pending_news,
+    clear_page_redis_cache,
+    get_page_redis_cache,
+)
 from agency.serializer import PageSerializer
 from agency.models import (
     Agency,
@@ -356,6 +362,29 @@ class PageAdmin(ReadOnlyAdminDateFieldsMIXIN):
                     )
                 html_parts.append("</ul>")
 
+        html_parts.append(
+            "<div style='display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap;'>"
+            "<a href='?action=clear_pending_cache' class='button' "
+            "style='padding: 8px 12px; background-color: #ba2121; color: white; "
+            "text-decoration: none; border-radius: 4px;'>"
+            "Clear pending news</a>"
+            "<a href='?action=clear_duplicate_cache' class='button' "
+            "style='padding: 8px 12px; background-color: #ba2121; color: white; "
+            "text-decoration: none; border-radius: 4px;'>"
+            "Clear duplicate checker</a>"
+            "<a href='?action=clear_all_cache' class='button' "
+            "style='padding: 8px 12px; background-color: #8b0000; color: white; "
+            "text-decoration: none; border-radius: 4px; font-weight: bold;'>"
+            "Clear all cache</a>"
+            "</div>"
+            "<p style='color: #666; font-size: 11px; margin-top: 8px;'>"
+            "<strong>Clear pending news</strong>: removes unsent articles for this page (db0). "
+            "<strong>Clear duplicate checker</strong>: removes seen-link memory for this agency "
+            f"domain ({escape(obj.agency.website)}) so the next crawl re-fetches listings (db1). "
+            "<strong>Clear all cache</strong>: does both."
+            "</p>"
+        )
+
         html_parts.append("</div>")
         return mark_safe("".join(html_parts))
 
@@ -380,31 +409,91 @@ class PageAdmin(ReadOnlyAdminDateFieldsMIXIN):
     def change_view(self, request, object_id, form_url="", extra_context=None):
         """Override change view to handle custom actions."""
         action = request.GET.get("action")
-        if action in ["crawl", "crawl_repetitive"]:
-            obj = self.get_object(request, object_id)
-            if obj:
+        obj = self.get_object(request, object_id)
+
+        if obj and action in [
+            "crawl",
+            "crawl_repetitive",
+            "clear_pending_cache",
+            "clear_duplicate_cache",
+            "clear_all_cache",
+        ]:
+            if action == "crawl":
                 tasks_module = importlib.import_module("agency.tasks")
-                if action == "crawl":
-                    tasks_module.page_crawl.delay(PageSerializer(obj).data)
-                    self.message_user(
-                        request,
-                        f"Page '{obj.masked_name}' is in queue to crawl.",
-                        messages.SUCCESS,
-                    )
-                elif action == "crawl_repetitive":
-                    tasks_module.page_crawl_repetitive.delay(PageSerializer(obj).data)
-                    self.message_user(
-                        request,
-                        f"Page '{obj.masked_name}' is in queue to crawl. (repetitive)",
-                        messages.SUCCESS,
-                    )
-                # Redirect to remove action parameter from URL
-                return HttpResponseRedirect(
-                    reverse(
-                        "admin:agency_page_change",
-                        args=[object_id],
-                    )
+                tasks_module.page_crawl.delay(PageSerializer(obj).data)
+                self.message_user(
+                    request,
+                    f"Page '{obj.masked_name}' is in queue to crawl.",
+                    messages.SUCCESS,
                 )
+            elif action == "crawl_repetitive":
+                tasks_module = importlib.import_module("agency.tasks")
+                tasks_module.page_crawl_repetitive.delay(PageSerializer(obj).data)
+                self.message_user(
+                    request,
+                    f"Page '{obj.masked_name}' is in queue to crawl. (repetitive)",
+                    messages.SUCCESS,
+                )
+            elif action == "clear_pending_cache":
+                try:
+                    deleted, _links = clear_page_pending_news(obj.id)
+                    self.message_user(
+                        request,
+                        f"Cleared {deleted} pending article(s) from Redis for page '{obj.masked_name}'.",
+                        messages.SUCCESS,
+                    )
+                except Exception as error:
+                    self.message_user(
+                        request,
+                        f"Failed to clear pending cache: {error}",
+                        messages.ERROR,
+                    )
+            elif action == "clear_duplicate_cache":
+                try:
+                    deleted = clear_agency_duplicate_links(obj.agency.website)
+                    self.message_user(
+                        request,
+                        f"Cleared {deleted} duplicate link(s) from Redis for agency domain '{obj.agency.website}'.",
+                        messages.SUCCESS,
+                    )
+                except Exception as error:
+                    self.message_user(
+                        request,
+                        f"Failed to clear duplicate cache: {error}",
+                        messages.ERROR,
+                    )
+            elif action == "clear_all_cache":
+                try:
+                    result = clear_page_redis_cache(
+                        obj.id,
+                        obj.agency.website,
+                        clear_pending=True,
+                        clear_duplicates=True,
+                        clear_agency_duplicates=True,
+                    )
+                    self.message_user(
+                        request,
+                        (
+                            f"Cleared Redis cache for page '{obj.masked_name}': "
+                            f"{result['pending_deleted']} pending article(s), "
+                            f"{result['agency_duplicate_deleted']} duplicate link(s)."
+                        ),
+                        messages.SUCCESS,
+                    )
+                except Exception as error:
+                    self.message_user(
+                        request,
+                        f"Failed to clear cache: {error}",
+                        messages.ERROR,
+                    )
+
+            return HttpResponseRedirect(
+                reverse(
+                    "admin:agency_page_change",
+                    args=[object_id],
+                )
+            )
+
         return super().change_view(request, object_id, form_url, extra_context)
 
     # actions
