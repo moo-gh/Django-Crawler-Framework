@@ -5,6 +5,7 @@ from prettyjson import PrettyJSONWidget
 from rangefilter.filter import DateTimeRangeFilter
 
 from django import forms
+from django.conf import settings
 from django.contrib import admin
 from django.contrib import messages
 from django.utils.html import format_html
@@ -119,6 +120,21 @@ class StructureForm(forms.ModelForm):
             ),
         }
 
+    @property
+    def media(self):
+        # Django 5.x media merge can load Monaco's loader.js between jquery.js and
+        # jquery.init.js, which breaks django-prettyjson on this form.
+        extra = "" if settings.DEBUG else ".min"
+        prettyjson_media = forms.Media(
+            js=(
+                f"admin/js/vendor/jquery/jquery{extra}.js",
+                "admin/js/jquery.init.js",
+                "prettyjson/prettyjson.js",
+            ),
+            css={"all": ("prettyjson/prettyjson.css",)},
+        )
+        return prettyjson_media + self.fields["news_links_code"].widget.media
+
 
 @admin.register(Structure)
 class StructureAdmin(ReadOnlyAdminDateFieldsMIXIN):
@@ -128,6 +144,15 @@ class StructureAdmin(ReadOnlyAdminDateFieldsMIXIN):
     form = StructureForm
     ordering = ("-updated_at",)
     search_fields = ("name",)
+    fields = (
+        "name",
+        "news_links_structure",
+        "news_meta_structure",
+        "news_links_code",
+        "created_at",
+        "updated_at",
+        "deleted_at",
+    )
 
 
 class PageAdminForm(forms.ModelForm):
