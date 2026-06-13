@@ -1,3 +1,12 @@
+# [1.71.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.70.0...v1.71.0) (2026-06-13)
+
+
+### Features
+
+* **telegram:** implement rate limiting for Telegram API calls using Redis ([944589a](https://github.com/moo-gh/Django-Crawler-Framework/commit/944589a2fcdcf95ea1918bcf3a7959d510480e56))
+
+
+
 # [1.70.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.69.0...v1.70.0) (2026-06-13)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **crawler:** filter active schedules by page and agency status ([8df7f27](https://github.com/moo-gh/Django-Crawler-Framework/commit/8df7f27095d429b7b162a40489b3f19140c4d6c6))
-
-
-
-# [1.67.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.66.0...v1.67.0) (2026-05-31)
-
-
-### Features
-
-* **crawler:** update cleanup_stale_redis_links to return number of deleted keys and improve logging ([030eb54](https://github.com/moo-gh/Django-Crawler-Framework/commit/030eb5492bbae44c576b73e6f9a777529f94a20e))
 
 
 
