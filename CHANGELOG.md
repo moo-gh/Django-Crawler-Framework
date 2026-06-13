@@ -1,3 +1,12 @@
+# [1.70.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.69.0...v1.70.0) (2026-06-13)
+
+
+### Features
+
+* **admin:** add cache management actions to PageAdmin for clearing pending news and duplicates ([9382344](https://github.com/moo-gh/Django-Crawler-Framework/commit/93823447bc8d12775d6b5a594a6b4f5870fdf920))
+
+
+
 # [1.69.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.68.0...v1.69.0) (2026-06-13)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **crawler:** update cleanup_stale_redis_links to return number of deleted keys and improve logging ([030eb54](https://github.com/moo-gh/Django-Crawler-Framework/commit/030eb5492bbae44c576b73e6f9a777529f94a20e))
-
-
-
-# [1.66.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.65.1...v1.66.0) (2026-05-31)
-
-
-### Features
-
-* **crawler:** add task to cleanup stale Redis links and schedule it hourly ([4b92aea](https://github.com/moo-gh/Django-Crawler-Framework/commit/4b92aeaa328b06efd054ee04122fc687d656adf1))
 
 
 
