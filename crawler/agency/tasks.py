@@ -21,7 +21,7 @@ from crawler.celery import crawler
 from notification import utils as not_utils
 from notification import models as not_models
 from ai import models as ai_models
-from reusable.other import only_one_concurrency
+from reusable.other import REDIS_CLIENT, only_one_concurrency
 
 
 MINUTE = 60
@@ -31,8 +31,10 @@ TASKS_TIMEOUT = 30 * MINUTE
 
 # Telegram rate limiting configuration
 TELEGRAM_MAX_RETRIES = 3
-TELEGRAM_BASE_DELAY = 1.0  # Base delay between messages in seconds
+TELEGRAM_MIN_INTERVAL = 0.5  # Minimum seconds between any Telegram API call
 TELEGRAM_RETRY_BUFFER = 2  # Extra seconds to add to Telegram's retry_after
+TELEGRAM_LAST_SEND_KEY = "telegram:last_send_at"
+TELEGRAM_RATE_LIMIT_LOCK_KEY = "telegram:rate_limit_lock"
 
 logger = get_task_logger(__name__)
 redis_news = redis.StrictRedis(host="crawler-redis", port=6379, db=0)
@@ -271,6 +273,29 @@ async def _send_telegram_message(token: str, chat_id: str, message: str):
         await bot.send_message(chat_id=chat_id, text=message)
 
 
+def _wait_for_telegram_rate_limit():
+    """Enforce a minimum interval between Telegram sends across all workers."""
+    lock = REDIS_CLIENT.lock(
+        TELEGRAM_RATE_LIMIT_LOCK_KEY, timeout=30, blocking_timeout=120
+    )
+    if not lock.acquire(blocking=True):
+        logger.warning("Could not acquire Telegram rate limit lock, proceeding anyway")
+        return
+
+    try:
+        last_raw = REDIS_CLIENT.get(TELEGRAM_LAST_SEND_KEY)
+        if last_raw is not None:
+            wait = TELEGRAM_MIN_INTERVAL - (time.time() - float(last_raw))
+            if wait > 0:
+                time.sleep(wait)
+        REDIS_CLIENT.set(TELEGRAM_LAST_SEND_KEY, time.time())
+    finally:
+        try:
+            lock.release()
+        except redis.exceptions.LockError:
+            logger.warning("Failed to release Telegram rate limit lock")
+
+
 def send_telegram_message_with_retry(
     bot_token: str,
     chat_id: str,
@@ -295,6 +320,7 @@ def send_telegram_message_with_retry(
         message = formatter.format(message)
     for attempt in range(max_retries + 1):
         try:
+            _wait_for_telegram_rate_limit()
             asyncio.run(_send_telegram_message(bot_token, chat_id, message))
             logger.debug(
                 f"Message sent successfully to {chat_id} on attempt {attempt + 1}"
@@ -445,9 +471,6 @@ def redis_exporter():
                     message,
                     page.telegram_channel,
                 )
-
-                # Add a small delay between messages to be respectful to Telegram's API
-                time.sleep(TELEGRAM_BASE_DELAY)
             except KeyError as error:
                 message = f"redis-exporter, key-error, code was: {temp_code}"
                 register_log(message, error, page, data["link"])
