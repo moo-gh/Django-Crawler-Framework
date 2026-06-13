@@ -32,7 +32,7 @@ def _redis_client(db: int) -> redis.StrictRedis:
     )
 
 
-def get_page_pending_news(page_id: int, limit: int = 25) -> list[dict[str, Any]]:
+def _iter_page_pending_news(page_id: int, limit: int | None = None) -> list[dict[str, Any]]:
     """Return pending news articles in Redis (db0) for a given page."""
     results = []
     try:
@@ -50,12 +50,17 @@ def get_page_pending_news(page_id: int, limit: int = 25) -> list[dict[str, Any]]
                 continue
             data["_redis_key"] = key
             results.append(data)
-            if len(results) >= limit:
+            if limit is not None and len(results) >= limit:
                 break
     except redis.RedisError:
         logger.exception("Failed to read pending news from Redis")
         return []
     return results
+
+
+def get_page_pending_news(page_id: int, limit: int = 25) -> list[dict[str, Any]]:
+    """Return pending news articles in Redis (db0) for a given page."""
+    return _iter_page_pending_news(page_id, limit=limit)
 
 
 def get_agency_duplicate_links(agency_website: str, limit: int = 25) -> dict[str, Any]:
@@ -85,3 +90,81 @@ def get_page_redis_cache(page_id: int, agency_website: str) -> dict[str, Any]:
         "pending_news": pending_news,
         "duplicate_checker": duplicate_links,
     }
+
+
+def clear_page_pending_news(page_id: int) -> tuple[int, list[str]]:
+    """Delete all pending news in Redis (db0) for a given page."""
+    deleted = 0
+    links = []
+    try:
+        client = _redis_client(PENDING_NEWS_DB)
+        for article in _iter_page_pending_news(page_id):
+            redis_key = article.get("_redis_key")
+            link = article.get("link")
+            if redis_key and client.delete(redis_key):
+                deleted += 1
+            if link:
+                links.append(link)
+    except redis.RedisError:
+        logger.exception("Failed to clear pending news from Redis")
+        raise
+    return deleted, links
+
+
+def clear_duplicate_links(links: list[str]) -> int:
+    """Delete specific links from the duplicate checker (db1)."""
+    if not links:
+        return 0
+    deleted = 0
+    try:
+        client = _redis_client(DUPLICATE_CHECKER_DB)
+        for link in links:
+            if client.delete(link):
+                deleted += 1
+    except redis.RedisError:
+        logger.exception("Failed to clear duplicate links from Redis")
+        raise
+    return deleted
+
+
+def clear_agency_duplicate_links(agency_website: str) -> int:
+    """Delete all duplicate-checker entries (db1) for an agency domain."""
+    deleted = 0
+    pattern = f"*{agency_website}*"
+    try:
+        client = _redis_client(DUPLICATE_CHECKER_DB)
+        for key in client.scan_iter(pattern, count=200):
+            if client.delete(key):
+                deleted += 1
+    except redis.RedisError:
+        logger.exception("Failed to clear agency duplicate links from Redis")
+        raise
+    return deleted
+
+
+def clear_page_redis_cache(
+    page_id: int,
+    agency_website: str,
+    *,
+    clear_pending: bool = True,
+    clear_duplicates: bool = True,
+    clear_agency_duplicates: bool = False,
+) -> dict[str, int]:
+    """Clear Redis cache entries related to a page."""
+    result = {
+        "pending_deleted": 0,
+        "duplicate_deleted": 0,
+        "agency_duplicate_deleted": 0,
+    }
+    pending_links = []
+
+    if clear_pending:
+        result["pending_deleted"], pending_links = clear_page_pending_news(page_id)
+
+    if clear_duplicates and pending_links:
+        result["duplicate_deleted"] = clear_duplicate_links(pending_links)
+
+    if clear_agency_duplicates:
+        result["agency_duplicate_deleted"] = clear_agency_duplicate_links(agency_website)
+
+    return result
