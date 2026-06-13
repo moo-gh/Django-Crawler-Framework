@@ -1,6 +1,7 @@
 import json
 import logging
 from typing import Any
+from urllib.parse import urlparse
 
 import redis
 
@@ -30,6 +31,32 @@ def _redis_client(db: int) -> redis.StrictRedis:
         db=db,
         decode_responses=True,
     )
+
+
+def agency_domain_from_website(agency_website: str) -> str:
+    """Extract hostname from agency website for matching crawled link URLs in Redis."""
+    website = agency_website.strip()
+    if not website:
+        return website
+    if "://" not in website:
+        website = f"http://{website}"
+    parsed = urlparse(website)
+    hostname = parsed.netloc or parsed.path.split("/")[0]
+    if hostname.startswith("www."):
+        hostname = hostname[4:]
+    return hostname
+
+
+def duplicate_checker_scan_pattern(agency_website: str) -> str:
+    """Redis SCAN pattern for duplicate-checker keys (db1) of an agency."""
+    domain = agency_domain_from_website(agency_website)
+    return f"*{domain}*"
+
+
+def pending_news_scan_pattern(agency_website: str) -> str:
+    """Redis SCAN pattern for pending-news keys (db0) of an agency."""
+    domain = agency_domain_from_website(agency_website)
+    return f"links_*{domain}*"
 
 
 def _iter_page_pending_news(page_id: int, limit: int | None = None) -> list[dict[str, Any]]:
@@ -65,7 +92,7 @@ def get_page_pending_news(page_id: int, limit: int = 25) -> list[dict[str, Any]]
 
 def get_agency_duplicate_links(agency_website: str, limit: int = 25) -> dict[str, Any]:
     """Return duplicate-checker entries (db1) for an agency domain."""
-    pattern = f"*{agency_website}*"
+    pattern = duplicate_checker_scan_pattern(agency_website)
     links = []
     total = 0
     try:
@@ -130,7 +157,7 @@ def clear_duplicate_links(links: list[str]) -> int:
 def clear_agency_duplicate_links(agency_website: str) -> int:
     """Delete all duplicate-checker entries (db1) for an agency domain."""
     deleted = 0
-    pattern = f"*{agency_website}*"
+    pattern = duplicate_checker_scan_pattern(agency_website)
     try:
         client = _redis_client(DUPLICATE_CHECKER_DB)
         for key in client.scan_iter(pattern, count=200):
