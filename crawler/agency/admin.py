@@ -1,4 +1,5 @@
 import importlib
+import json
 from typing import Optional
 from datetime import datetime
 from rangefilter.filter import DateTimeRangeFilter
@@ -6,7 +7,8 @@ from rangefilter.filter import DateTimeRangeFilter
 from django import forms
 from django.contrib import admin
 from django.contrib import messages
-from django.utils.html import format_html
+from django.utils.html import escape, format_html
+from django.utils.safestring import mark_safe
 from django.utils.translation import ngettext
 from django.template.defaultfilters import truncatechars
 from django.urls import reverse
@@ -14,6 +16,7 @@ from django.http import HttpResponseRedirect
 from djangoeditorwidgets.widgets import MonacoEditorWidget
 
 from reusable.admins import ReadOnlyAdminDateFieldsMIXIN
+from agency.redis_utils import TRACKED_ARTICLE_FIELDS, get_page_redis_cache
 from agency.serializer import PageSerializer
 from agency.models import (
     Agency,
@@ -183,6 +186,7 @@ class PageAdmin(ReadOnlyAdminDateFieldsMIXIN):
         "updated_at",
         "deleted_at",
         "crawl_buttons",
+        "redis_cache_preview",
     )
     list_display = (
         "get_masked_name",
@@ -214,6 +218,7 @@ class PageAdmin(ReadOnlyAdminDateFieldsMIXIN):
         "message_template",
         "last_crawl",
         "crawl_buttons",
+        "redis_cache_preview",
         ("created_at", "updated_at", "deleted_at"),
     )
 
@@ -253,6 +258,106 @@ class PageAdmin(ReadOnlyAdminDateFieldsMIXIN):
         if instance.last_crawl_new_count:
             return instance.last_crawl_new_count
         return None
+
+    @admin.display(description="Redis Cache")
+    def redis_cache_preview(self, obj):
+        """Show pending news and duplicate-checker entries from Redis."""
+        if not obj.pk:
+            return "-"
+
+        try:
+            cache = get_page_redis_cache(obj.id, obj.agency.website)
+        except Exception as error:
+            return format_html(
+                '<p style="color: #ba2121;">Could not read Redis: {}</p>',
+                escape(str(error)),
+            )
+
+        pending_news = cache["pending_news"]
+        duplicate = cache["duplicate_checker"]
+        duplicate_error = duplicate.get("error")
+
+        html_parts = [
+            "<div style='max-width: 100%; overflow-x: auto;'>",
+            "<h4>Pending news (Redis db0) — waiting for Telegram</h4>",
+            f"<p><strong>{len(pending_news)}</strong> article(s) for this page "
+            f"(page_id={obj.id}).</p>",
+        ]
+
+        if pending_news:
+            html_parts.append(
+                "<table style='width:100%; border-collapse: collapse; font-size: 12px;'>"
+                "<thead><tr>"
+                "<th style='border:1px solid #ccc; padding:4px;'>Link</th>"
+                "<th style='border:1px solid #ccc; padding:4px;'>Title</th>"
+                "<th style='border:1px solid #ccc; padding:4px;'>info3</th>"
+                "<th style='border:1px solid #ccc; padding:4px;'>info4</th>"
+                "<th style='border:1px solid #ccc; padding:4px;'>built</th>"
+                "<th style='border:1px solid #ccc; padding:4px;'>room</th>"
+                "</tr></thead><tbody>"
+            )
+            for article in pending_news:
+                link = truncatechars(article.get("link", ""), 40)
+                html_parts.append(
+                    "<tr>"
+                    f"<td style='border:1px solid #ccc; padding:4px;'>{escape(link)}</td>"
+                    f"<td style='border:1px solid #ccc; padding:4px;'>{escape(str(article.get('title', '')))}</td>"
+                    f"<td style='border:1px solid #ccc; padding:4px;'>{escape(str(article.get('info3', '')))}</td>"
+                    f"<td style='border:1px solid #ccc; padding:4px;'>{escape(str(article.get('info4', '')))}</td>"
+                    f"<td style='border:1px solid #ccc; padding:4px;'>{escape(str(article.get('built', '')))}</td>"
+                    f"<td style='border:1px solid #ccc; padding:4px;'>{escape(str(article.get('room', '')))}</td>"
+                    "</tr>"
+                )
+            html_parts.append("</tbody></table>")
+
+            raw_preview = []
+            for article in pending_news[:5]:
+                preview_item = {
+                    field: article.get(field, "")
+                    for field in TRACKED_ARTICLE_FIELDS
+                    if field in article
+                }
+                preview_item["link"] = article.get("link", "")
+                raw_preview.append(preview_item)
+            html_parts.append(
+                "<details style='margin-top: 10px;'><summary>Raw JSON preview (max 5)</summary>"
+                f"<pre style='white-space: pre-wrap; font-size: 11px;'>{escape(json.dumps(raw_preview, ensure_ascii=False, indent=2))}</pre>"
+                "</details>"
+            )
+        else:
+            html_parts.append(
+                "<p style='color: #666;'>No pending articles. "
+                "Either already sent to Telegram or not crawled yet.</p>"
+            )
+
+        html_parts.append("<h4 style='margin-top: 16px;'>Duplicate checker (Redis db1)</h4>")
+        if duplicate_error:
+            html_parts.append(
+                f"<p style='color: #ba2121;'>{escape(duplicate_error)}</p>"
+            )
+        else:
+            html_parts.append(
+                f"<p><strong>{duplicate['total']}</strong> link(s) marked as seen "
+                f"for agency domain <code>{escape(obj.agency.website)}</code>. "
+                "Normal crawl skips these; use <em>Crawl Page (Repetitive)</em> to re-fetch.</p>"
+            )
+            if duplicate["links"]:
+                html_parts.append("<ul style='font-size: 12px; margin: 0; padding-left: 18px;'>")
+                for item in duplicate["links"]:
+                    ttl = item["ttl_seconds"]
+                    ttl_label = f"{ttl}s" if ttl and ttl > 0 else "no expiry"
+                    html_parts.append(
+                        f"<li>{escape(truncatechars(item['link'], 80))} "
+                        f"<span style='color:#666;'>(TTL: {ttl_label})</span></li>"
+                    )
+                if duplicate["total"] > len(duplicate["links"]):
+                    html_parts.append(
+                        f"<li style='color:#666;'>… and {duplicate['total'] - len(duplicate['links'])} more</li>"
+                    )
+                html_parts.append("</ul>")
+
+        html_parts.append("</div>")
+        return mark_safe("".join(html_parts))
 
     @admin.display(description="Crawl Actions")
     def crawl_buttons(self, obj):
