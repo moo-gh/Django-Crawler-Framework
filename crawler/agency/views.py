@@ -12,6 +12,10 @@ from rest_framework.pagination import PageNumberPagination
 
 from agency import serializer as age_serializer
 from agency.models import Agency, Page, Report
+from agency.redis_utils import (
+    duplicate_checker_scan_pattern,
+    pending_news_scan_pattern,
+)
 from crawler.messages import msg
 
 
@@ -255,11 +259,13 @@ def reset_agency_memory(agency_id):
     redis_news = redis.StrictRedis(host="crawler-redis", port=6379, db=0)
     redis_duplicate_checker = redis.StrictRedis(host="crawler-redis", port=6379, db=1)
     counter_links = 0
-    for key in redis_duplicate_checker.scan_iter("*" + str(agency.website) + "*"):
+    for key in redis_duplicate_checker.scan_iter(
+        duplicate_checker_scan_pattern(agency.website)
+    ):
         redis_duplicate_checker.delete(key)
         counter_links += 1
     counter_news = 0
-    for key in redis_news.scan_iter("*" + str(agency.website) + "*"):
+    for key in redis_news.scan_iter(pending_news_scan_pattern(agency.website)):
         redis_news.delete(key)
         counter_news += 1
     return counter_links, counter_news
