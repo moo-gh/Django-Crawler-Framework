@@ -1,3 +1,12 @@
+# [1.69.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.68.0...v1.69.0) (2026-06-13)
+
+
+### Features
+
+* **admin:** add Redis cache preview to PageAdmin for pending news and duplicates ([5e21ee9](https://github.com/moo-gh/Django-Crawler-Framework/commit/5e21ee9ef8867d34db8854d13a65019f1cfbb714))
+
+
+
 # [1.68.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.67.1...v1.68.0) (2026-06-13)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **crawler:** add task to cleanup stale Redis links and schedule it hourly ([4b92aea](https://github.com/moo-gh/Django-Crawler-Framework/commit/4b92aeaa328b06efd054ee04122fc687d656adf1))
-
-
-
-## [1.65.1](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.65.0...v1.65.1) (2026-05-31)
-
-
-### Bug Fixes
-
-* **crawler:** implement custom email backend for Python 3.12 compatibility ([96ea3be](https://github.com/moo-gh/Django-Crawler-Framework/commit/96ea3beed99b827c5d72af0e0b7b12c0caf0e4de))
 
 
 
