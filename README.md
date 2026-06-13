@@ -197,5 +197,22 @@ make format-python
 make lint-python
 ```
 
+## Maintenance
+
+Regenerate `requirements.txt` from `requirements.in` using pip-tools in a one-off container:
+
+```bash
+cd /path/to/crawler
+docker run --rm \
+  -v "$(pwd):/app" \
+  -w /app \
+  python:3.12-slim \
+  bash -c "
+    apt-get update &&
+    apt-get install -y --no-install-recommends libpq-dev gcc &&
+    pip install pip-tools &&
+    pip-compile requirements.in -o requirements.txt
+  "
+```
 
 **Built with ❤️ using Django, Celery, Selenium, and Docker**
