@@ -1,3 +1,12 @@
+# [1.72.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.71.0...v1.72.0) (2026-06-16)
+
+
+### Features
+
+* **telegram:** enhance Telegram message handling with improved error classification and retry logic ([c4c987b](https://github.com/moo-gh/Django-Crawler-Framework/commit/c4c987ba9bca1a0ab1b698208815edc76ae3273d))
+
+
+
 # [1.71.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.70.0...v1.71.0) (2026-06-13)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **admin:** enhance StructureForm with media property for better compatibility with Django 5.x ([ea05dc0](https://github.com/moo-gh/Django-Crawler-Framework/commit/ea05dc02b061479194933c45f91e2b3d1016c9e8))
-
-
-
-## [1.67.1](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.67.0...v1.67.1) (2026-05-31)
-
-
-### Bug Fixes
-
-* **crawler:** filter active schedules by page and agency status ([8df7f27](https://github.com/moo-gh/Django-Crawler-Framework/commit/8df7f27095d429b7b162a40489b3f19140c4d6c6))
 
 
 
