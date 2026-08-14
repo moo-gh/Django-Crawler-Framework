@@ -7,7 +7,11 @@ import redis
 from bs4 import BeautifulSoup
 
 from selenium import webdriver
-from selenium.common.exceptions import SessionNotCreatedException, TimeoutException
+from selenium.common.exceptions import (
+    SessionNotCreatedException,
+    TimeoutException,
+    WebDriverException,
+)
 from django.conf import settings
 from django.utils import timezone
 from celery.utils.log import get_task_logger
@@ -170,6 +174,12 @@ class CrawlerEngine:
                 )
                 self.logging(error, "warning")
                 return False
+            except WebDriverException as error:
+                description = utils.describe_navigation_error(
+                    error, self.page.url, self.page.use_proxy
+                )
+                self.logging(description, "warning")
+                raise utils.CrawlerNavigationError(description) from error
 
         return True
 
@@ -294,6 +304,15 @@ class CrawlerEngine:
                 doc = BeautifulSoup(self.driver.page_source, "html.parser")
             except TimeoutException:
                 logger.error(f"Timeout while loading {data['link']}", exc_info=True)
+                return
+            except WebDriverException as error:
+                description = utils.describe_navigation_error(
+                    error, data["link"], self.page.use_proxy
+                )
+                self.logging(description, "warning")
+                if utils.is_proxy_connection_error(error):
+                    raise utils.CrawlerNavigationError(description) from error
+                self.register_log(description, str(error), self.page, data["link"])
                 return
 
             if meta:
@@ -443,15 +462,39 @@ class CrawlerEngine:
             logger.debug(message)
         self.log_messages += f"{message} \n\n"
 
+    def mark_crawl_failed(self):
+        """Unlock the page and mark the current report as failed."""
+        if getattr(self, "page", None):
+            self.page.lock = False
+            self.page.save(update_fields=["lock"])
+        if getattr(self, "report", None):
+            self.report.status = models.Report.FAILED
+            self.report.log = self.log_messages
+            self.report.save(update_fields=["status", "log"])
+
+    def quit_driver(self):
+        driver = getattr(self, "driver", None)
+        if driver is None:
+            return
+        try:
+            driver.quit()
+        except Exception:
+            logger.warning("Failed to quit WebDriver", exc_info=True)
+
     def run(self):
         """Run the crawler engine
         first: we get links from the specified page
         second: we get data from each page
         """
-        self.logging(f"---> Fetching links from {self.page} started")
-        self.fetch_links()
-        self.logging(
-            f"---> We've found {self.fetched_links_count} number of links for {self.page}"
-        )
-        self.check_data()
-        self.driver.quit()
+        try:
+            self.logging(f"---> Fetching links from {self.page} started")
+            self.fetch_links()
+            self.logging(
+                f"---> We've found {self.fetched_links_count} number of links for {self.page}"
+            )
+            self.check_data()
+        except Exception:
+            self.mark_crawl_failed()
+            raise
+        finally:
+            self.quit_driver()
