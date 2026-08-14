@@ -1,3 +1,12 @@
+# [1.74.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.73.0...v1.74.0) (2026-08-14)
+
+
+### Features
+
+* **crawler:** enhance error handling and logging in CrawlerEngine ([931ff1f](https://github.com/moo-gh/Django-Crawler-Framework/commit/931ff1f819860b37d05f6e8f325694668a53b852))
+
+
+
 # [1.73.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.72.0...v1.73.0) (2026-08-14)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **admin:** add cache management actions to PageAdmin for clearing pending news and duplicates ([9382344](https://github.com/moo-gh/Django-Crawler-Framework/commit/93823447bc8d12775d6b5a594a6b4f5870fdf920))
-
-
-
-# [1.69.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.68.0...v1.69.0) (2026-06-13)
-
-
-### Features
-
-* **admin:** add Redis cache preview to PageAdmin for pending news and duplicates ([5e21ee9](https://github.com/moo-gh/Django-Crawler-Framework/commit/5e21ee9ef8867d34db8854d13a65019f1cfbb714))
 
 
 
