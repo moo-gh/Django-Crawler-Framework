@@ -1,3 +1,12 @@
+# [1.73.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.72.0...v1.73.0) (2026-08-14)
+
+
+### Features
+
+* **admin:** add ordering to Agency model and admin interface ([18a7872](https://github.com/moo-gh/Django-Crawler-Framework/commit/18a78725a92f21ce6f5bca701ab0e7a1561a7887))
+
+
+
 # [1.72.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.71.0...v1.72.0) (2026-06-16)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **admin:** add Redis cache preview to PageAdmin for pending news and duplicates ([5e21ee9](https://github.com/moo-gh/Django-Crawler-Framework/commit/5e21ee9ef8867d34db8854d13a65019f1cfbb714))
-
-
-
-# [1.68.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.67.1...v1.68.0) (2026-06-13)
-
-
-### Features
-
-* **admin:** enhance StructureForm with media property for better compatibility with Django 5.x ([ea05dc0](https://github.com/moo-gh/Django-Crawler-Framework/commit/ea05dc02b061479194933c45f91e2b3d1016c9e8))
 
 
 
