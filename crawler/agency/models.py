@@ -32,6 +32,7 @@ class Agency(BaseModel):
 
     class Meta:
         verbose_name_plural = "agencies"
+        ordering = ["name"]
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

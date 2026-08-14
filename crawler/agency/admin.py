@@ -97,6 +97,7 @@ class ReportAdmin(ReadOnlyAdminDateFieldsMIXIN):
 class AgencyAdmin(ReadOnlyAdminDateFieldsMIXIN):
     """Admin interface for Agency model."""
 
+    ordering = ("name",)
     list_filter = ("status",)
     list_editable = ("status", "link_keep_days", "load_timeout")
     list_display = (
