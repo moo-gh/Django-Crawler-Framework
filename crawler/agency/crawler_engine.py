@@ -76,21 +76,40 @@ class CrawlerEngine:
     def initialize_driver(self, use_proxy: bool) -> bool:
         """
         Initializes the driver for the crawler engine.
+
+        Selenium Grid has a single Firefox slot. A leftover session, a restarting
+        node, or a slow Firefox start can make NEW_SESSION wait until the hub
+        times out. Retry once so a transient gap does not skip the crawl.
         """
-        try:
-            self.driver = webdriver.Remote(
-                "http://crawler-selenium-hub:4444",
-                options=utils.get_browser_options(use_proxy),
-            )
-        except SessionNotCreatedException:
-            # TODO: Custom handling
-            self.logging(traceback.format_exc(), "error")
-            return False
-        except Exception:
-            self.logging(traceback.format_exc(), "error")
-            return False
-        self.driver.header_overrides = utils.DEFAULT_HEADER
-        return True
+        options = utils.get_browser_options(use_proxy)
+        max_attempts = 2
+        retry_sleep_seconds = 60
+        for attempt in range(1, max_attempts + 1):
+            try:
+                self.driver = webdriver.Remote(
+                    "http://crawler-selenium-hub:4444",
+                    options=options,
+                )
+                self.driver.header_overrides = utils.DEFAULT_HEADER
+                return True
+            except SessionNotCreatedException as exc:
+                error_text = utils.get_webdriver_error_text(exc)
+                message = (
+                    "Selenium Grid could not start a Firefox session "
+                    f"(attempt {attempt}/{max_attempts}): {error_text}. "
+                    "The Firefox node is likely busy, restarting, or out of memory. "
+                    "Check crawler_node_docker and crawler-selenium-hub."
+                )
+                if attempt < max_attempts:
+                    self.logging(message, "warning")
+                    time.sleep(retry_sleep_seconds)
+                    continue
+                self.logging(message, "error")
+                return False
+            except Exception:
+                self.logging(traceback.format_exc(), "error")
+                return False
+        return False
 
     def after_initialize_driver(self, page_id):
         """
