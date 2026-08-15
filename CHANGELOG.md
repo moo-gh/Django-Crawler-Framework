@@ -1,3 +1,12 @@
+## [1.75.1](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.75.0...v1.75.1) (2026-08-15)
+
+
+### Bug Fixes
+
+* **crawler:** improve Telegram caption handling and message sending logic ([e40a9e8](https://github.com/moo-gh/Django-Crawler-Framework/commit/e40a9e8952e89c59536bdb456b5d6b5ab0bfee38))
+
+
+
 # [1.75.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.74.0...v1.75.0) (2026-08-15)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **telegram:** enhance Telegram message handling with improved error classification and retry logic ([c4c987b](https://github.com/moo-gh/Django-Crawler-Framework/commit/c4c987ba9bca1a0ab1b698208815edc76ae3273d))
-
-
-
-# [1.71.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.70.0...v1.71.0) (2026-06-13)
-
-
-### Features
-
-* **telegram:** implement rate limiting for Telegram API calls using Redis ([944589a](https://github.com/moo-gh/Django-Crawler-Framework/commit/944589a2fcdcf95ea1918bcf3a7959d510480e56))
 
 
 
