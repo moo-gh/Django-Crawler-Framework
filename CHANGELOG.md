@@ -1,3 +1,12 @@
+## [1.75.2](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.75.1...v1.75.2) (2026-08-15)
+
+
+### Bug Fixes
+
+* **crawler:** improve WebDriver session initialization with retry logic ([e54db7d](https://github.com/moo-gh/Django-Crawler-Framework/commit/e54db7dd2521fb801a9fe609760cb9baafe27170))
+
+
+
 ## [1.75.1](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.75.0...v1.75.1) (2026-08-15)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **admin:** add ordering to Agency model and admin interface ([18a7872](https://github.com/moo-gh/Django-Crawler-Framework/commit/18a78725a92f21ce6f5bca701ab0e7a1561a7887))
-
-
-
-# [1.72.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.71.0...v1.72.0) (2026-06-16)
-
-
-### Features
-
-* **telegram:** enhance Telegram message handling with improved error classification and retry logic ([c4c987b](https://github.com/moo-gh/Django-Crawler-Framework/commit/c4c987ba9bca1a0ab1b698208815edc76ae3273d))
 
 
 
