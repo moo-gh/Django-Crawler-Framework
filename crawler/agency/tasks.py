@@ -337,10 +337,13 @@ def _resolve_listing_image_urls(data: dict) -> list[str]:
     return images.normalize_image_urls(data.get("images"))
 
 
-def _caption_for_media(message: str) -> Optional[str]:
-    if len(message) <= TELEGRAM_CAPTION_LIMIT:
-        return message
-    return None
+def _caption_for_media(message: str) -> str:
+    """Telegram captions are limited to 1024 chars; keep listing text on the album."""
+    main, separator, _ = message.partition("\n--- debug images ---")
+    caption = main.strip() if separator else message.strip()
+    if len(caption) <= TELEGRAM_CAPTION_LIMIT:
+        return caption
+    return caption[: TELEGRAM_CAPTION_LIMIT - 1] + "…"
 
 
 async def _send_telegram_text(token: str, chat_id: str, message: str):
@@ -362,19 +365,15 @@ async def _send_telegram_photos(
                 photo=image_urls[0],
                 caption=caption,
             )
-        else:
-            media = [
-                InputMediaPhoto(
-                    media=url,
-                    caption=caption if index == 0 else None,
-                )
-                for index, url in enumerate(image_urls)
-            ]
-            await bot.send_media_group(chat_id=chat_id, media=media)
-
-        if caption is None:
-            await asyncio.sleep(TELEGRAM_MIN_INTERVAL)
-            await bot.send_message(chat_id=chat_id, text=message)
+            return
+        media = [
+            InputMediaPhoto(
+                media=url,
+                caption=caption if index == 0 else None,
+            )
+            for index, url in enumerate(image_urls)
+        ]
+        await bot.send_media_group(chat_id=chat_id, media=media)
 
 
 async def _send_telegram_message(
