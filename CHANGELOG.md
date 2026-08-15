@@ -1,3 +1,12 @@
+# [1.75.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.74.0...v1.75.0) (2026-08-15)
+
+
+### Features
+
+* **crawler:** add image URL normalization and Telegram photo handling ([c62544b](https://github.com/moo-gh/Django-Crawler-Framework/commit/c62544b4a4cff1c68d139a33f241d09ce37f214d))
+
+
+
 # [1.74.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.73.0...v1.74.0) (2026-08-14)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **telegram:** implement rate limiting for Telegram API calls using Redis ([944589a](https://github.com/moo-gh/Django-Crawler-Framework/commit/944589a2fcdcf95ea1918bcf3a7959d510480e56))
-
-
-
-# [1.70.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.69.0...v1.70.0) (2026-06-13)
-
-
-### Features
-
-* **admin:** add cache management actions to PageAdmin for clearing pending news and duplicates ([9382344](https://github.com/moo-gh/Django-Crawler-Framework/commit/93823447bc8d12775d6b5a594a6b4f5870fdf920))
 
 
 
