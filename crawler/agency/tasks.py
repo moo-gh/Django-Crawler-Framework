@@ -11,14 +11,15 @@ import traceback
 from dataclasses import dataclass
 from typing import Literal, Optional
 from datetime import timedelta
-from telegram.error import NetworkError, RetryAfter, TelegramError, TimedOut
+from telegram import InputMediaPhoto
+from telegram.error import BadRequest, NetworkError, RetryAfter, TelegramError, TimedOut
 from telegram.request import HTTPXRequest
 
 from django.conf import settings
 from django.utils import timezone
 from celery.utils.log import get_task_logger
 
-from . import utils, models
+from . import images, utils, models
 from crawler.celery import crawler
 from notification import utils as not_utils
 from notification import models as not_models
@@ -41,6 +42,7 @@ TELEGRAM_DEFER_SECONDS = 600  # 10 minutes before redis_exporter retries a faile
 TELEGRAM_MAX_DEFER_ATTEMPTS = 6  # ~1 hour of deferred retries before giving up
 TELEGRAM_HTTP_TIMEOUT = 30.0
 TELEGRAM_MESSAGE_PREVIEW_LENGTH = 150
+TELEGRAM_CAPTION_LIMIT = images.TELEGRAM_CAPTION_LIMIT
 
 TELEGRAM_HTTP_REQUEST = HTTPXRequest(
     connect_timeout=TELEGRAM_HTTP_TIMEOUT,
@@ -330,9 +332,68 @@ def _classify_telegram_error(exc: Exception) -> Literal["transient", "permanent"
     return "transient"
 
 
-async def _send_telegram_message(token: str, chat_id: str, message: str):
+def _resolve_listing_image_urls(data: dict) -> list[str]:
+    """Return listing photo URLs extracted into the article by news_meta_structure."""
+    return images.normalize_image_urls(data.get("images"))
+
+
+def _caption_for_media(message: str) -> Optional[str]:
+    if len(message) <= TELEGRAM_CAPTION_LIMIT:
+        return message
+    return None
+
+
+async def _send_telegram_text(token: str, chat_id: str, message: str):
     async with telegram.Bot(token=token, request=TELEGRAM_HTTP_REQUEST) as bot:
         await bot.send_message(chat_id=chat_id, text=message)
+
+
+async def _send_telegram_photos(
+    token: str,
+    chat_id: str,
+    message: str,
+    image_urls: list[str],
+):
+    caption = _caption_for_media(message)
+    async with telegram.Bot(token=token, request=TELEGRAM_HTTP_REQUEST) as bot:
+        if len(image_urls) == 1:
+            await bot.send_photo(
+                chat_id=chat_id,
+                photo=image_urls[0],
+                caption=caption,
+            )
+        else:
+            media = [
+                InputMediaPhoto(
+                    media=url,
+                    caption=caption if index == 0 else None,
+                )
+                for index, url in enumerate(image_urls)
+            ]
+            await bot.send_media_group(chat_id=chat_id, media=media)
+
+        if caption is None:
+            await asyncio.sleep(TELEGRAM_MIN_INTERVAL)
+            await bot.send_message(chat_id=chat_id, text=message)
+
+
+async def _send_telegram_message(
+    token: str,
+    chat_id: str,
+    message: str,
+    image_urls: Optional[list[str]] = None,
+):
+    if image_urls:
+        try:
+            await _send_telegram_photos(token, chat_id, message, image_urls)
+            return
+        except BadRequest as exc:
+            logger.warning(
+                "Telegram rejected listing photos (%s), sending text only",
+                exc,
+            )
+            message = f"{message}\n\nphoto_send_error: {exc}"
+    await _send_telegram_text(token, chat_id, message)
 
 
 def _wait_for_telegram_rate_limit():
@@ -364,6 +425,7 @@ def send_telegram_message_with_retry(
     message: str,
     max_retries: int = TELEGRAM_MAX_RETRIES,
     formatter: Optional[ai_models.Formatter] = None,
+    image_urls: Optional[list[str]] = None,
 ) -> TelegramSendResult:
     """
     Send a Telegram message with proper rate limiting and retry logic.
@@ -374,16 +436,25 @@ def send_telegram_message_with_retry(
         message: Message text to send
         max_retries: Maximum number of retry attempts
         formatter: Formatter instance
+        image_urls: Optional listing photo URLs to attach as a photo album
 
     Returns:
         TelegramSendResult with success flag, failure kind, and error detail
     """
     if formatter:
         message = formatter.format(message)
+    image_urls = images.normalize_image_urls(image_urls or [])
     for attempt in range(max_retries + 1):
         try:
             _wait_for_telegram_rate_limit()
-            asyncio.run(_send_telegram_message(bot_token, chat_id, message))
+            asyncio.run(
+                _send_telegram_message(
+                    bot_token,
+                    chat_id,
+                    message,
+                    image_urls=image_urls,
+                )
+            )
             logger.debug(
                 f"Message sent successfully to {chat_id} on attempt {attempt + 1}"
             )
@@ -554,8 +625,12 @@ def redis_exporter():
                     )
                     continue
 
+                image_urls = _resolve_listing_image_urls(data)
                 send_result = send_telegram_message_with_retry(
-                    settings.BOT_API_KEY, page.telegram_channel, message
+                    settings.BOT_API_KEY,
+                    page.telegram_channel,
+                    message,
+                    image_urls=image_urls,
                 )
                 if send_result.success:
                     logger.info(
