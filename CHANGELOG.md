@@ -1,3 +1,12 @@
+## [1.76.1](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.76.0...v1.76.1) (2026-08-16)
+
+
+### Bug Fixes
+
+* **crawler:** enhance custom code execution context in CrawlerEngine ([6095746](https://github.com/moo-gh/Django-Crawler-Framework/commit/6095746af68aebac491838c547d36911e22a91ef))
+
+
+
 # [1.76.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.75.2...v1.76.0) (2026-08-16)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **crawler:** add image URL normalization and Telegram photo handling ([c62544b](https://github.com/moo-gh/Django-Crawler-Framework/commit/c62544b4a4cff1c68d139a33f241d09ce37f214d))
-
-
-
-# [1.74.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.73.0...v1.74.0) (2026-08-14)
-
-
-### Features
-
-* **crawler:** enhance error handling and logging in CrawlerEngine ([931ff1f](https://github.com/moo-gh/Django-Crawler-Framework/commit/931ff1f819860b37d05f6e8f325694668a53b852))
 
 
 
