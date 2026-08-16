@@ -459,7 +459,18 @@ class CrawlerEngine:
         """Safely execute custom code and handle errors."""
         try:
             # Execute the code, making 'article', 'key', and 'doc' available within the code
-            exec(code, {"article": article, "key": key, "doc": doc})
+            exec(
+                code,
+                {
+                    "article": article,
+                    "key": key,
+                    "doc": doc,
+                    "driver": getattr(self, "driver", None),
+                    "time": time,
+                    "BeautifulSoup": BeautifulSoup,
+                    "By": By,
+                },
+            )
         except Exception as e:
             logger.error(
                 f"Error executing code:\n{code}\nfor link {link}", exc_info=True
