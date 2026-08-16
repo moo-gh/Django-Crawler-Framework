@@ -111,6 +111,34 @@ def describe_navigation_error(
     return f"Browser navigation failed{proxy_note} while loading {url}: {error_text}"
 
 
+_BROWSER_ERROR_URL_MARKERS = (
+    "about:neterror",
+    "about:certerror",
+    "about:blocked",
+    "chrome-error://",
+)
+
+
+def document_failed_to_load(driver, doc) -> bool:
+    """True when the browser did not receive a usable HTML document.
+
+    This is site-agnostic: it looks at the browser URL and DOM, not at
+    scraped field names such as title or meter.
+    """
+    current_url = (getattr(driver, "current_url", None) or "").lower()
+    if any(marker in current_url for marker in _BROWSER_ERROR_URL_MARKERS):
+        return True
+
+    page_source = getattr(driver, "page_source", None) or ""
+    if "about:neterror" in page_source.lower():
+        return True
+
+    if doc is None or doc.find("body") is None:
+        return True
+
+    return False
+
+
 def is_image(ext: str) -> bool:
     """
     Validate if the file extension is an allowed image type.
@@ -150,6 +178,39 @@ def report_image_path(_instance, filename: str) -> Optional[str]:
             f"{int(timezone.now().timestamp())}.{ext}",
         )
     return None
+
+
+def _has_extracted_value(value) -> bool:
+    if value is None:
+        return False
+    if isinstance(value, str):
+        return bool(value.strip())
+    if isinstance(value, (list, tuple, dict)):
+        return bool(value)
+    return True
+
+
+def article_missing_extracted_content(article: dict, meta_structure) -> bool:
+    """True when this page's own meta structure extracted no field values.
+
+    Uses each page's news_meta_structure, not site-specific field names.
+    Empty fields on a loaded document are an extraction miss, not proof
+    that the site is down.
+    """
+    if not isinstance(meta_structure, dict) or not meta_structure:
+        return False
+
+    extractable_keys = [
+        key
+        for key, spec in meta_structure.items()
+        if not (isinstance(spec, dict) and spec.get("tag") == "value")
+    ]
+    if not extractable_keys:
+        return False
+
+    return not any(
+        _has_extracted_value(article.get(key)) for key in extractable_keys
+    )
 
 
 def get_browser_options(use_proxy: bool = False) -> FirefoxOptions:

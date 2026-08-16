@@ -25,6 +25,9 @@ logger = get_task_logger(__name__)
 redis_news = redis.StrictRedis(host="crawler-redis", port=6379, db=0)
 redis_duplicate_checker = redis.StrictRedis(host="crawler-redis", port=6379, db=1)
 
+CONTENT_FETCH_ATTEMPTS = 3
+CONTENT_FETCH_RETRY_SLEEP = 15
+
 
 class CrawlerEngine:
     def __init__(self, page: dict, repetitive: bool = False):
@@ -314,31 +317,73 @@ class CrawlerEngine:
         article = data
         article["page_id"] = self.page.id
 
-        doc = None
         if fetch_content:
-            # Fetch the content from the URL
-            try:
-                self.driver.get(data["link"])
-                time.sleep(self.page.load_sleep)
-                doc = BeautifulSoup(self.driver.page_source, "html.parser")
-            except TimeoutException:
-                logger.error(f"Timeout while loading {data['link']}", exc_info=True)
-                return
-            except WebDriverException as error:
-                description = utils.describe_navigation_error(
-                    error, data["link"], self.page.use_proxy
-                )
-                self.logging(description, "warning")
-                if utils.is_proxy_connection_error(error):
-                    raise utils.CrawlerNavigationError(description) from error
-                self.register_log(description, str(error), self.page, data["link"])
-                return
-
-            if meta:
-                self.extract_meta_data(meta, doc, article, data["link"])
+            self.fetch_link_content(article, data["link"], meta)
 
         self.logging(f"crawl_one_page: {article}", "debug")
         self.save_to_redis(article)
+
+    def fetch_link_content(self, article, link, meta):
+        """Open this fetched link and extract inner fields.
+
+        Retries the inner URL when the document fails to load or no
+        structured fields were extracted. After the last attempt the
+        article is still saved, so Telegram can send Unknown values.
+        """
+        for attempt in range(1, CONTENT_FETCH_ATTEMPTS + 1):
+            doc = self.load_link_document(link, attempt)
+            if doc is None or utils.document_failed_to_load(self.driver, doc):
+                self.logging(
+                    f"Inner page did not load {link} "
+                    f"(attempt {attempt}/{CONTENT_FETCH_ATTEMPTS})",
+                    "warning",
+                )
+                if attempt < CONTENT_FETCH_ATTEMPTS:
+                    time.sleep(CONTENT_FETCH_RETRY_SLEEP)
+                continue
+
+            if meta:
+                self.extract_meta_data(meta, doc, article, link)
+
+            if not utils.article_missing_extracted_content(article, meta):
+                return
+
+            self.logging(
+                f"No structured fields for {link} "
+                f"(attempt {attempt}/{CONTENT_FETCH_ATTEMPTS})",
+                "warning",
+            )
+            if attempt < CONTENT_FETCH_ATTEMPTS:
+                time.sleep(CONTENT_FETCH_RETRY_SLEEP)
+
+    def load_link_document(self, link, attempt: int):
+        """Open one fetched link and return its parsed HTML, or None on failure."""
+        try:
+            self.driver.get(link)
+            time.sleep(self.page.load_sleep)
+            return BeautifulSoup(self.driver.page_source, "html.parser")
+        except TimeoutException:
+            self.logging(
+                f"Timeout while loading {link} "
+                f"(attempt {attempt}/{CONTENT_FETCH_ATTEMPTS})",
+                "warning",
+            )
+            if attempt >= CONTENT_FETCH_ATTEMPTS:
+                logger.error("Timeout while loading %s", link, exc_info=True)
+            return None
+        except WebDriverException as error:
+            description = utils.describe_navigation_error(
+                error, link, self.page.use_proxy
+            )
+            self.logging(
+                f"{description} (attempt {attempt}/{CONTENT_FETCH_ATTEMPTS})",
+                "warning",
+            )
+            if utils.is_proxy_connection_error(error):
+                raise utils.CrawlerNavigationError(description) from error
+            if attempt >= CONTENT_FETCH_ATTEMPTS:
+                self.register_log(description, str(error), self.page, link)
+            return None
 
     def extract_meta_data(self, meta, doc, article, link):
         """Extract meta data from the document with retry mechanism."""
