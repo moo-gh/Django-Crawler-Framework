@@ -1,3 +1,12 @@
+# [1.77.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.76.1...v1.77.0) (2026-08-23)
+
+
+### Features
+
+* **crawler:** add HTTP 5xx error page detection utility ([0f2e7d8](https://github.com/moo-gh/Django-Crawler-Framework/commit/0f2e7d8c2d37369c54dd4ddd4e581b10024e35e3))
+
+
+
 ## [1.76.1](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.76.0...v1.76.1) (2026-08-16)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **crawler:** improve Telegram caption handling and message sending logic ([e40a9e8](https://github.com/moo-gh/Django-Crawler-Framework/commit/e40a9e8952e89c59536bdb456b5d6b5ab0bfee38))
-
-
-
-# [1.75.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.74.0...v1.75.0) (2026-08-15)
-
-
-### Features
-
-* **crawler:** add image URL normalization and Telegram photo handling ([c62544b](https://github.com/moo-gh/Django-Crawler-Framework/commit/c62544b4a4cff1c68d139a33f241d09ce37f214d))
 
 
 
