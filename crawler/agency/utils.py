@@ -139,6 +139,21 @@ def document_failed_to_load(driver, doc) -> bool:
     return False
 
 
+_HTTP_5XX_RE = re.compile(
+    r"\b50[0-9]\b|bad gateway|internal server error|service unavailable|gateway timeout",
+    re.I,
+)
+
+
+def is_5xx_page(page_source: Optional[str]) -> bool:
+    """True when the browser received an HTTP 5xx error page instead of content."""
+    if not page_source:
+        return False
+    title = re.search(r"<title>(.*?)</title>", page_source, re.I | re.S)
+    text = title.group(1) if title else page_source[:500]
+    return bool(_HTTP_5XX_RE.search(text))
+
+
 def is_image(ext: str) -> bool:
     """
     Validate if the file extension is an allowed image type.
