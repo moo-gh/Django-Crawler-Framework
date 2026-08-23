@@ -1,3 +1,12 @@
+# [1.78.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.77.0...v1.78.0) (2026-08-23)
+
+
+### Features
+
+* **crawler:** enhance Telegram media handling with error detection ([409a29b](https://github.com/moo-gh/Django-Crawler-Framework/commit/409a29bb783ec56de1618f4c86c3ae1f027b7c8d))
+
+
+
 # [1.77.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.76.1...v1.77.0) (2026-08-23)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **crawler:** improve WebDriver session initialization with retry logic ([e54db7d](https://github.com/moo-gh/Django-Crawler-Framework/commit/e54db7dd2521fb801a9fe609760cb9baafe27170))
-
-
-
-## [1.75.1](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.75.0...v1.75.1) (2026-08-15)
-
-
-### Bug Fixes
-
-* **crawler:** improve Telegram caption handling and message sending logic ([e40a9e8](https://github.com/moo-gh/Django-Crawler-Framework/commit/e40a9e8952e89c59536bdb456b5d6b5ab0bfee38))
 
 
 
