@@ -1,3 +1,12 @@
+# [1.79.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.78.0...v1.79.0) (2026-08-25)
+
+
+### Features
+
+* **crawler:** refactor Telegram message sending to use a reusable HTTP client ([959315a](https://github.com/moo-gh/Django-Crawler-Framework/commit/959315a40fd501c673d7dc127fcae3fdaeebbb98))
+
+
+
 # [1.78.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.77.0...v1.78.0) (2026-08-23)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **crawler:** implement content fetching with retry mechanism ([e125150](https://github.com/moo-gh/Django-Crawler-Framework/commit/e12515034ee5ad69ce36a53d8802c8a3b7baa941))
-
-
-
-## [1.75.2](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.75.1...v1.75.2) (2026-08-15)
-
-
-### Bug Fixes
-
-* **crawler:** improve WebDriver session initialization with retry logic ([e54db7d](https://github.com/moo-gh/Django-Crawler-Framework/commit/e54db7dd2521fb801a9fe609760cb9baafe27170))
 
 
 
