@@ -41,15 +41,10 @@ TELEGRAM_RATE_LIMIT_LOCK_KEY = "telegram:rate_limit_lock"
 TELEGRAM_DEFER_SECONDS = 600  # 10 minutes before redis_exporter retries a failed send
 TELEGRAM_MAX_DEFER_ATTEMPTS = 6  # ~1 hour of deferred retries before giving up
 TELEGRAM_HTTP_TIMEOUT = 30.0
+TELEGRAM_CONNECTION_POOL_SIZE = 8
+TELEGRAM_POOL_TIMEOUT = 5.0
 TELEGRAM_MESSAGE_PREVIEW_LENGTH = 150
 TELEGRAM_CAPTION_LIMIT = images.TELEGRAM_CAPTION_LIMIT
-
-TELEGRAM_HTTP_REQUEST = HTTPXRequest(
-    connect_timeout=TELEGRAM_HTTP_TIMEOUT,
-    read_timeout=TELEGRAM_HTTP_TIMEOUT,
-    write_timeout=TELEGRAM_HTTP_TIMEOUT,
-    pool_timeout=TELEGRAM_HTTP_TIMEOUT,
-)
 
 logger = get_task_logger(__name__)
 redis_news = redis.StrictRedis(host="crawler-redis", port=6379, db=0)
@@ -365,34 +360,43 @@ def _failed_media_index(exc: Exception) -> Optional[int]:
     return int(match.group(1)) - 1
 
 
-async def _send_telegram_text(token: str, chat_id: str, message: str):
-    async with telegram.Bot(token=token, request=TELEGRAM_HTTP_REQUEST) as bot:
-        await bot.send_message(chat_id=chat_id, text=message)
+def _build_telegram_request() -> HTTPXRequest:
+    """Create an HTTP client bound to the current event loop."""
+    return HTTPXRequest(
+        connection_pool_size=TELEGRAM_CONNECTION_POOL_SIZE,
+        connect_timeout=TELEGRAM_HTTP_TIMEOUT,
+        read_timeout=TELEGRAM_HTTP_TIMEOUT,
+        write_timeout=TELEGRAM_HTTP_TIMEOUT,
+        pool_timeout=TELEGRAM_POOL_TIMEOUT,
+    )
+
+
+async def _send_telegram_text(bot: telegram.Bot, chat_id: str, message: str):
+    await bot.send_message(chat_id=chat_id, text=message)
 
 
 async def _send_telegram_photos(
-    token: str,
+    bot: telegram.Bot,
     chat_id: str,
     message: str,
     image_urls: list[str],
 ):
     caption = _caption_for_media(message)
-    async with telegram.Bot(token=token, request=TELEGRAM_HTTP_REQUEST) as bot:
-        if len(image_urls) == 1:
-            await bot.send_photo(
-                chat_id=chat_id,
-                photo=image_urls[0],
-                caption=caption,
-            )
-            return
-        media = [
-            InputMediaPhoto(
-                media=url,
-                caption=caption if index == 0 else None,
-            )
-            for index, url in enumerate(image_urls)
-        ]
-        await bot.send_media_group(chat_id=chat_id, media=media)
+    if len(image_urls) == 1:
+        await bot.send_photo(
+            chat_id=chat_id,
+            photo=image_urls[0],
+            caption=caption,
+        )
+        return
+    media = [
+        InputMediaPhoto(
+            media=url,
+            caption=caption if index == 0 else None,
+        )
+        for index, url in enumerate(image_urls)
+    ]
+    await bot.send_media_group(chat_id=chat_id, media=media)
 
 
 async def _send_telegram_message(
@@ -401,28 +405,29 @@ async def _send_telegram_message(
     message: str,
     image_urls: Optional[list[str]] = None,
 ):
-    urls = list(image_urls or [])
-    while urls:
-        try:
-            await _send_telegram_photos(token, chat_id, message, urls)
-            return
-        except BadRequest as exc:
-            if not _is_telegram_url_fetch_error(exc):
+    async with telegram.Bot(token=token, request=_build_telegram_request()) as bot:
+        urls = list(image_urls or [])
+        while urls:
+            try:
+                await _send_telegram_photos(bot, chat_id, message, urls)
+                return
+            except BadRequest as exc:
+                if not _is_telegram_url_fetch_error(exc):
+                    logger.warning(
+                        "Telegram rejected listing photos (%s), sending text only",
+                        exc,
+                    )
+                    break
+                dropped = _failed_media_index(exc)
+                if dropped is None or dropped < 0 or dropped >= len(urls):
+                    dropped = 0
                 logger.warning(
-                    "Telegram rejected listing photos (%s), sending text only",
+                    "Telegram could not fetch listing photo URL (%s): %s; skipping it",
+                    urls[dropped],
                     exc,
                 )
-                break
-            dropped = _failed_media_index(exc)
-            if dropped is None or dropped < 0 or dropped >= len(urls):
-                dropped = 0
-            logger.warning(
-                "Telegram could not fetch listing photo URL (%s): %s; skipping it",
-                urls[dropped],
-                exc,
-            )
-            urls.pop(dropped)
-    await _send_telegram_text(token, chat_id, message)
+                urls.pop(dropped)
+        await _send_telegram_text(bot, chat_id, message)
 
 
 def _wait_for_telegram_rate_limit():
