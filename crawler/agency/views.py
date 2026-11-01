@@ -45,6 +45,10 @@ class AgencyView(viewsets.ModelViewSet):
         return Response(response_data)
 
     def update(self, request, *args, _version=None, pk=None, **kwargs):
+        return Response(
+            {"status": "403", "message": "Not allowed"},
+            status=403,
+        )
         instance = get_object_or_404(self.get_queryset(), pk=pk)
         serializer = self.serializer_class(instance, data=request.data, partial=True)
         if serializer.is_valid():
@@ -63,6 +67,10 @@ class AgencyView(viewsets.ModelViewSet):
         return Response(response_data)
 
     def retrieve(self, *args, _request=None, _version=None, pk=None, **kwargs):
+        return Response(
+            {"status": "403", "message": "Not allowed"},
+            status=403,
+        )
         try:
             agency = Agency.objects.get(pk=pk)
         except Agency.DoesNotExist:
@@ -77,6 +85,10 @@ class AgencyView(viewsets.ModelViewSet):
         return Response(data)
 
     def destroy(self, *args, _request=None, _version=None, pk=None, **kwargs):
+        return Response(
+            {"status": "403", "message": "Not allowed"},
+            status=403,
+        )
         try:
             agency = Agency.objects.get(pk=pk)
         except Agency.DoesNotExist:
@@ -134,6 +146,11 @@ class PageView(viewsets.ModelViewSet):
     def update(self, request, *args, _version=None, pk=None, **kwargs):
         instance = get_object_or_404(self.get_queryset(), pk=pk)
         serializer = self.serializer_class(instance, data=request.data, partial=True)
+        # not allowed
+        return Response(
+            {"status": "403", "message": "Not allowed"},
+            status=403,
+        )
         if serializer.is_valid():
             serializer.save()
             response_data = {
@@ -156,6 +173,10 @@ class PageView(viewsets.ModelViewSet):
             return Response(
                 {"status": "400", "message": msg["fa"]["page"]["page_not_found"]}
             )
+        return Response(
+            {"status": "403", "message": "Not allowed"},
+            status=403,
+        )
         page.deleted_at = timezone.localtime()
         page.save()
         response_data = {
