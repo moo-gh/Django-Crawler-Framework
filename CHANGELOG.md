@@ -1,3 +1,12 @@
+# [1.80.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.79.0...v1.80.0) (2026-11-01)
+
+
+### Features
+
+* **crawler:** add authentication and permission settings for API ([e94117e](https://github.com/moo-gh/Django-Crawler-Framework/commit/e94117eed443b4c03f8c24e13042464ed0d3cba6))
+
+
+
 # [1.79.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.78.0...v1.79.0) (2026-08-25)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **crawler:** enhance custom code execution context in CrawlerEngine ([6095746](https://github.com/moo-gh/Django-Crawler-Framework/commit/6095746af68aebac491838c547d36911e22a91ef))
-
-
-
-# [1.76.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.75.2...v1.76.0) (2026-08-16)
-
-
-### Features
-
-* **crawler:** implement content fetching with retry mechanism ([e125150](https://github.com/moo-gh/Django-Crawler-Framework/commit/e12515034ee5ad69ce36a53d8802c8a3b7baa941))
 
 
 
