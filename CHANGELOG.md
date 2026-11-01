@@ -1,3 +1,12 @@
+# [1.81.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.80.0...v1.81.0) (2026-11-01)
+
+
+### Features
+
+* **crawler:** improve URL safety checks in CrawlerEngine and models ([3cf3c6f](https://github.com/moo-gh/Django-Crawler-Framework/commit/3cf3c6f0a98457a7d54a7421135fa61a1b822605))
+
+
+
 # [1.80.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.79.0...v1.80.0) (2026-11-01)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **crawler:** add HTTP 5xx error page detection utility ([0f2e7d8](https://github.com/moo-gh/Django-Crawler-Framework/commit/0f2e7d8c2d37369c54dd4ddd4e581b10024e35e3))
-
-
-
-## [1.76.1](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.76.0...v1.76.1) (2026-08-16)
-
-
-### Bug Fixes
-
-* **crawler:** enhance custom code execution context in CrawlerEngine ([6095746](https://github.com/moo-gh/Django-Crawler-Framework/commit/6095746af68aebac491838c547d36911e22a91ef))
 
 
 
