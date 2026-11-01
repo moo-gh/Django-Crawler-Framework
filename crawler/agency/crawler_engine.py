@@ -146,15 +146,36 @@ class CrawlerEngine:
             error=error,
         )
 
+    def _navigation_stayed_safe(self) -> bool:
+        current = self.driver.current_url or ""
+        if current.startswith("about:"):
+            return True
+        if utils.is_allowed_crawl_url(current, resolve=not self.page.use_proxy):
+            return True
+        self.logging(f"Blocked redirect to unsafe URL: {current}", "warning")
+        try:
+            self.driver.get("about:blank")
+        except WebDriverException:
+            pass
+        return False
+
     def land_page(self) -> bool:
         """
         Lands on the page with retry mechanism.
         """
         max_retries = 3
+        if not utils.is_allowed_crawl_url(
+            self.page.url,
+            resolve=not self.page.use_proxy,
+        ):
+            self.logging(f"Blocked unsafe crawl URL: {self.page.url}", "warning")
+            return False
 
         for _ in range(max_retries):
             try:
                 self.driver.get(self.page.url)
+                if not self._navigation_stayed_safe():
+                    return False
                 self.remove_some_images(self.driver)
 
                 # Wait for page to be fully loaded
@@ -318,7 +339,13 @@ class CrawlerEngine:
         article["page_id"] = self.page.id
 
         if fetch_content:
-            self.fetch_link_content(article, data["link"], meta)
+            if not utils.is_allowed_crawl_url(
+                data["link"],
+                resolve=not self.page.use_proxy,
+            ):
+                self.logging(f"Blocked unsafe link: {data['link']}", "warning")
+            else:
+                self.fetch_link_content(article, data["link"], meta)
 
         self.logging(f"crawl_one_page: {article}", "debug")
         self.save_to_redis(article)
@@ -359,7 +386,12 @@ class CrawlerEngine:
     def load_link_document(self, link, attempt: int):
         """Open one fetched link and return its parsed HTML, or None on failure."""
         try:
+            if not utils.is_allowed_crawl_url(link, resolve=not self.page.use_proxy):
+                self.logging(f"Blocked unsafe link: {link}", "warning")
+                return None
             self.driver.get(link)
+            if not self._navigation_stayed_safe():
+                return None
             time.sleep(self.page.load_sleep)
             return BeautifulSoup(self.driver.page_source, "html.parser")
         except TimeoutException:

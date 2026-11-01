@@ -1,8 +1,10 @@
+import ipaddress
 import logging
 import re
+import socket
 from os import path
 from typing import Optional, List
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, urlparse
 
 from django.utils import timezone
 from django.core.exceptions import ValidationError
@@ -226,6 +228,109 @@ def article_missing_extracted_content(article: dict, meta_structure) -> bool:
     return not any(
         _has_extracted_value(article.get(key)) for key in extractable_keys
     )
+
+
+_BLOCKED_HOST_SUFFIXES = (
+    ".local",
+    ".localhost",
+    ".localdomain",
+    ".internal",
+    ".intranet",
+    ".lan",
+    ".home",
+    ".corp",
+)
+
+
+def _hostname_is_blocked(hostname: str) -> bool:
+    host = hostname.lower().rstrip(".")
+    if not host or host == "localhost":
+        return True
+    if any(host.endswith(suffix) for suffix in _BLOCKED_HOST_SUFFIXES):
+        return True
+    # Single-label names are Docker services and other internal hosts.
+    if "." not in host and ":" not in host:
+        return True
+    return False
+
+
+def _ip_is_public(raw: str) -> bool:
+    try:
+        address = ipaddress.ip_address(raw.split("%", 1)[0])
+    except ValueError:
+        return False
+    mapped = getattr(address, "ipv4_mapped", None)
+    if mapped is not None:
+        address = mapped
+    return bool(address.is_global)
+
+
+def _resolved_addresses(hostname: str) -> list[str]:
+    previous = socket.getdefaulttimeout()
+    socket.setdefaulttimeout(5)
+    try:
+        infos = socket.getaddrinfo(hostname, None)
+    finally:
+        socket.setdefaulttimeout(previous)
+    return [info[4][0] for info in infos if info[4]]
+
+
+def public_http_url_problem(value: str, *, resolve: bool = False) -> Optional[str]:
+    """Return why a crawl URL is unsafe, or None when it is allowed.
+
+    Relative links are allowed only when resolve is True, which is the crawl
+    check. Saved page URLs must be absolute. DNS is optional because proxied
+    crawls cannot trust the local resolver.
+    """
+    if value is None or not str(value).strip():
+        return "URL is required."
+    candidate = str(value).strip()
+    parsed = urlparse(candidate)
+    if parsed.scheme == "" and parsed.netloc == "":
+        if resolve:
+            return None
+        return "URL must be an absolute http or https address."
+    if parsed.scheme not in ("http", "https") or not parsed.netloc:
+        return "Only absolute http and https URLs are allowed."
+    if parsed.username or parsed.password:
+        return "URL must not include credentials."
+    hostname = parsed.hostname
+    if not hostname:
+        return "URL must include a host."
+    if _hostname_is_blocked(hostname):
+        return "URL host is not allowed."
+    try:
+        literal_ip = ipaddress.ip_address(hostname)
+    except ValueError:
+        literal_ip = None
+    if literal_ip is not None and not _ip_is_public(hostname):
+        return "URL host must be a public address."
+    if not resolve or literal_ip is not None:
+        return None
+    try:
+        addresses = _resolved_addresses(hostname)
+    except socket.gaierror:
+        return "URL host could not be resolved."
+    if not addresses or any(not _ip_is_public(address) for address in addresses):
+        return "URL host must be a public address."
+    return None
+
+
+def is_allowed_crawl_url(value: str, *, resolve: bool = True) -> bool:
+    """Allow a relative link, or an absolute http(s) URL with a public host."""
+    if value is None or not str(value).strip():
+        return False
+    candidate = str(value).strip()
+    parsed = urlparse(candidate)
+    if parsed.scheme == "" and parsed.netloc == "":
+        return True
+    return public_http_url_problem(candidate, resolve=resolve) is None
+
+
+def validate_public_http_url(value: str) -> None:
+    problem = public_http_url_problem(value, resolve=False)
+    if problem:
+        raise ValidationError(problem)
 
 
 def get_browser_options(use_proxy: bool = False) -> FirefoxOptions:

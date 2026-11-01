@@ -70,7 +70,12 @@ class Page(BaseModel):
     scroll = models.PositiveIntegerField(
         default=0, help_text="how many times to scroll"
     )
-    url = models.CharField(max_length=2000, null=False, unique=True)
+    url = models.CharField(
+        max_length=2000,
+        null=False,
+        unique=True,
+        validators=[utils.validate_public_http_url],
+    )
     crawl_interval = models.PositiveIntegerField(default=60, help_text="minute")
     load_sleep = models.PositiveIntegerField(
         default=4, blank=True, help_text="each link sleep"
