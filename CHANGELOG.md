@@ -1,3 +1,12 @@
+# [1.82.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.81.0...v1.82.0) (2026-11-18)
+
+
+### Features
+
+* **crawler:** add configuration for admin error email notifications ([12dc1c9](https://github.com/moo-gh/Django-Crawler-Framework/commit/12dc1c90f0b7aada5760ab392c44dc4ac6fee0f6))
+
+
+
 # [1.81.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.80.0...v1.81.0) (2026-11-01)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **crawler:** enhance Telegram media handling with error detection ([409a29b](https://github.com/moo-gh/Django-Crawler-Framework/commit/409a29bb783ec56de1618f4c86c3ae1f027b7c8d))
-
-
-
-# [1.77.0](https://github.com/moo-gh/Django-Crawler-Framework/compare/v1.76.1...v1.77.0) (2026-08-23)
-
-
-### Features
-
-* **crawler:** add HTTP 5xx error page detection utility ([0f2e7d8](https://github.com/moo-gh/Django-Crawler-Framework/commit/0f2e7d8c2d37369c54dd4ddd4e581b10024e35e3))
 
 
 
