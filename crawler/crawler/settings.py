@@ -135,6 +135,7 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default=None)
 
 # Email Logging Configs
 ADMIN_EMAIL_LOG = env("ADMIN_EMAIL_LOG", default=None)
+SEND_ADMIN_ERROR_EMAILS = env.bool("SEND_ADMIN_ERROR_EMAILS", default=True)
 ADMINS = (("Log Admin", ADMIN_EMAIL_LOG),)
 SERVER_EMAIL = EMAIL_HOST_USER
 
@@ -164,6 +165,53 @@ django.setup()  # we need setup django to have access to apps
 LOG_LEVEL = env("LOG_LEVEL", default="ERROR")
 
 if EMAIL_HOST_USER and ADMIN_EMAIL_LOG:
+    _error_log_handlers = ["log_db", "log_all_info", "log_all_error"]
+    _celery_error_log_handlers = ["log_db", "log_celery_info", "log_celery_error"]
+    if SEND_ADMIN_ERROR_EMAILS:
+        _error_log_handlers.insert(0, "mail_admins")
+        _celery_error_log_handlers.insert(0, "mail_admins")
+
+    _logging_handlers = {
+        "log_db": {
+            "class": "reusable.logging.DBHandler",
+            "level": "ERROR",
+        },
+        "log_all_info": {
+            "class": "logging.FileHandler",
+            "filename": "/app/crawler/logs/all_info.log",
+            "mode": "a",
+            "level": "INFO",
+            "formatter": "simple",
+        },
+        "log_all_error": {
+            "class": "logging.FileHandler",
+            "filename": "/app/crawler/logs/all_error.log",
+            "mode": "a",
+            "level": "ERROR",
+            "formatter": "simple",
+        },
+        "log_celery_info": {
+            "class": "logging.FileHandler",
+            "filename": "/app/crawler/logs/celery_info.log",
+            "mode": "a",
+            "level": "INFO",
+            "formatter": "simple",
+        },
+        "log_celery_error": {
+            "class": "logging.FileHandler",
+            "filename": "/app/crawler/logs/celery_error.log",
+            "mode": "a",
+            "level": "ERROR",
+            "formatter": "simple",
+        },
+    }
+    if SEND_ADMIN_ERROR_EMAILS:
+        _logging_handlers["mail_admins"] = {
+            "level": "ERROR",
+            "class": "reusable.logging.CustomAdminEmailHandler",
+            "formatter": "simple",
+        }
+
     LOGGING = {
         "version": 1,
         "disable_existing_loggers": False,
@@ -173,65 +221,17 @@ if EMAIL_HOST_USER and ADMIN_EMAIL_LOG:
                 "datefmt": "%Y-%m-%d %H:%M:%S",  # Custom date/time format
             }
         },
-        "handlers": {
-            "mail_admins": {
-                "level": "ERROR",
-                "class": "reusable.logging.CustomAdminEmailHandler",
-                "formatter": "simple",
-            },
-            "log_db": {
-                "class": "reusable.logging.DBHandler",
-                "level": "ERROR",
-            },
-            "log_all_info": {
-                "class": "logging.FileHandler",
-                "filename": "/app/crawler/logs/all_info.log",
-                "mode": "a",
-                "level": "INFO",
-                "formatter": "simple",
-            },
-            "log_all_error": {
-                "class": "logging.FileHandler",
-                "filename": "/app/crawler/logs/all_error.log",
-                "mode": "a",
-                "level": "ERROR",
-                "formatter": "simple",
-            },
-            "log_celery_info": {
-                "class": "logging.FileHandler",
-                "filename": "/app/crawler/logs/celery_info.log",
-                "mode": "a",
-                "level": "INFO",
-                "formatter": "simple",
-            },
-            "log_celery_error": {
-                "class": "logging.FileHandler",
-                "filename": "/app/crawler/logs/celery_error.log",
-                "mode": "a",
-                "level": "ERROR",
-                "formatter": "simple",
-            },
-        },
+        "handlers": _logging_handlers,
         "loggers": {
             # all modules
             "": {
-                "handlers": [
-                    "mail_admins",
-                    "log_db",
-                    "log_all_info",
-                    "log_all_error",
-                ],
+                "handlers": _error_log_handlers,
                 "level": f"{LOG_LEVEL}",
                 "propagate": False,
             },
             # celery modules
             "celery": {
-                "handlers": [
-                    "mail_admins",
-                    "log_db",
-                    "log_celery_info",
-                    "log_celery_error",
-                ],
+                "handlers": _celery_error_log_handlers,
                 "level": f"{LOG_LEVEL}",
                 "propagate": True,  # if True, will propagate to root logger
             },
